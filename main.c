@@ -10,7 +10,6 @@ int xlen = 0, ylen = 0, zlen = 0, cellcount = 0;
 int population = 0;
 char * inputFile = NULL;
 
-
 int * createWorldFromTxt(char * name, int xlen, int ylen, int zlen)
 {
 	printf("Creating space for intial world...\n");
@@ -46,7 +45,6 @@ int * createWorldFromTxt(char * name, int xlen, int ylen, int zlen)
 
 int count_neighbours(int * world, int xlen, int ylen, int zlen, int x, int y, int z)
 {
-
 	int count = 0;
 	int starti = -1;
 	int startj = -1;
@@ -65,20 +63,20 @@ int count_neighbours(int * world, int xlen, int ylen, int zlen, int x, int y, in
 			for (int i = starti; i <= endi; i++)
 			{
 				if (x + i < 0)
-					xo = xlen;
-				else if (x + i > xlen)
+					xo = xlen - 1;
+				else if (x + i >= xlen)
 					xo = 0;
 				else xo = x + i;
 
 				if (y + j < 0)
-					yo = ylen;
-				else if (y + j > ylen)
+					yo = ylen - 1;
+				else if (y + j >= ylen)
 					yo = 0;
 				else yo = y + j
 
 				if (z + k < 0)
-					zo = zlen;
-				else if (z + k > zlen)
+					zo = zlen - 1;
+				else if (z + k >= zlen)
 					zo = 0;
 				else zo = z + k;
 
