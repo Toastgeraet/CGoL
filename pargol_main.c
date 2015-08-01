@@ -100,7 +100,7 @@ int main(int argc, char * argv[])
 		//Exchange of front and back z-layers of neigbouhring slices of the cube
 		int * data = NULL;
 		int count = xlen * ylen;
-		
+	/*	
 		if (processId % 2 == 0){
 			data = &current[count*(chunksize - 2)];
 			MPI_Send(data, count, MPI_INT, (processId + 1) % 2,	"step 1", MPI_COMM_WORLD);			
@@ -126,7 +126,7 @@ int main(int argc, char * argv[])
 			
 			data = current;
 			MPI_Send(data, count, MPI_INT, (processId - 1) % 2, "step 4", MPI_COMM_WORLD);
-		}
+		}*/
 			
 		//Each cube calculates its portion
 		population = 0;
