@@ -13,18 +13,19 @@ const int MASTER = 0;
 
 
 //Program Entry Point
-int main(int argc, char * argv[])
+int main(int argc, char ** argv)
 {	
 	//Initialize MPI
 	int numberOfProcesses = 0, processId = 0;
-	MPI_Init(&argc, &argv);
+	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 
 	//Parse commandline arguments | pargol_console.c	
 	char * inputFile = NULL;
+
 	int xlen = 0, ylen = 0, zlen = 0;	
-	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
+	parseArguments(argc, &argv, inputFile, &xlen, &ylen, &zlen);
 
 	//Parse inputworld into memory | pargol_input.c
 	int * input;
