@@ -26,7 +26,7 @@ int main(int argc, char * argv[])
 	int xlen = 0, ylen = 0, zlen = 0;	
 	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
 	if (processId == MASTER){
-		printf("task %d sum is %s\n", i, inputFile);
+		printf("task %d sum is %s\n", 1, inputFile);
 	}
 
 
