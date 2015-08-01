@@ -27,7 +27,9 @@ int main(int argc, char * argv[])
 
 	//Parse inputworld into memory | pargol_input.c
 	int * input;
-	if (world_rank == MASTER){
+	int population = 0;
+
+	if (processId == MASTER){
 		input = createWorldFromTxt(inputFile, &population, xlen, ylen, zlen);
 	}
 
@@ -64,7 +66,8 @@ int main(int argc, char * argv[])
 	int * next = calloc(xlen * ylen * chunksize, sizeof(int));
 
 	int * sendbuf = input;
-	int * recvbuf = current + (xlen * ylen);	
+	int z_layer_size = (xlen * ylen);
+	int * recvbuf = current + z_layer_size;
 	
 	int MPI_Scatterv(sendbuf, sendcounts, displs, MPI_INT, recvbuf, scounts[processId],	MPI_INT, MASTER, MPI_COMM_WORLD);
 
