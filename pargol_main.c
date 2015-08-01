@@ -10,13 +10,14 @@
 
 //MPI Variables (and Constants)
 const int MASTER = 0;
-int numberOfProcesses = 0, processId = 0;
+
 
 //Program Entry Point
 int main(int argc, char * argv[])
 {	
 	//Initialize MPI
-	MPI_Init(NULL, NULL);
+	int numberOfProcesses = 0, processId = 0;
+	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 
@@ -100,7 +101,7 @@ int main(int argc, char * argv[])
 		//Exchange of front and back z-layers of neigbouhring slices of the cube
 		int * data = NULL;
 		int count = xlen * ylen;
-	/*	
+		
 		if (processId % 2 == 0){
 			data = &current[count*(chunksize - 2)];
 			MPI_Send(data, count, MPI_INT, (processId + 1) % 2,	"step 1", MPI_COMM_WORLD);			
@@ -126,7 +127,7 @@ int main(int argc, char * argv[])
 			
 			data = current;
 			MPI_Send(data, count, MPI_INT, (processId - 1) % 2, "step 4", MPI_COMM_WORLD);
-		}*/
+		}
 			
 		//Each cube calculates its portion
 		population = 0;
