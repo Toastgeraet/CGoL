@@ -22,7 +22,7 @@ int main(int argc, char * argv[])
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 
 	//Parse commandline arguments | pargol_console.c	
-	char * inputFile = argv[1];
+	char * inputFile = argv[1]; //this should be done in parsearguments - confused by pointer logic
 	int xlen = 0, ylen = 0, zlen = 0;	
 	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
 	
@@ -36,8 +36,7 @@ int main(int argc, char * argv[])
 
 	if (processId == MASTER){
 		printf("Initial population is %d\n", population);
-	}
-
+	}	
 
 	//Calculate distribution values for parallel processing
 	//each process will count the neighbours for a given amount of consecutive zlayers
@@ -80,7 +79,9 @@ int main(int argc, char * argv[])
 	MPI_Scatterv(sendbuf, scounts, displs, MPI_INT, recvbuf, scounts[processId], MPI_INT, MASTER, MPI_COMM_WORLD);
 
 	//release parsed world into oblivion
-	free(sendbuf);
+	if (processId == MASTER){
+		free(sendbuf);
+	}	
 
 	//How long should it evolve
 	int maxGenerationen = 100;
