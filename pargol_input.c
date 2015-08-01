@@ -24,7 +24,7 @@ int * createWorldFromTxt(char * name, int * population, int xlen, int ylen, int 
 		if (c == '0') tempworld[i] = 0;
 		else if (c == '1') {
 			tempworld[i] = 1;
-			* population++;
+			*population = *population + 1;
 		}
 		else i--; //because it's a linebreak char or something			
 	}
