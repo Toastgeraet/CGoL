@@ -58,7 +58,7 @@ int main(int argc, char * argv[])
 	displs[0] = 0;
 	for (int i = 1; i < numberOfProcesses; i++)
 	{
-		displs[i] = scounts[i] + displs[i - 1];
+		displs[i] = scounts[i - 1] + displs[i - 1];
 	}
 		
 	//Calculating for each process how many layers it must be able to hold (2 for neighbouring slices)
