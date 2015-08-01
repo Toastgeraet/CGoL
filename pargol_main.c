@@ -108,7 +108,8 @@ int main(int argc, char * argv[])
 		int * data = NULL;
 		int count = xlen * ylen;
 		int nextProcessId = (processId + 1) % numberOfProcesses;
-		int prevProcessId = (processId - 1) % numberOfProcesses;
+		int prevProcessId = (processId - 1);
+		prevProcessId = prevProcessId < 0 ? numberOfProcesses - prevProcessId : prevProcessId;
 		
 		if (processId % 2 == 0) //every other process does this
 		{ 
