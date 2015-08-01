@@ -172,6 +172,8 @@ int main(int argc, char * argv[])
 		next = calloc(xlen * ylen * chunksize, sizeof(int));
 	}
 	
+	MPI_Finalize();
+
 	//free(output_name_buf);
 	printf("Finished evolving for %d generations.\n\nPress any key to close this window.", maxGenerationen);
 	getline();
