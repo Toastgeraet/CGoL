@@ -13,7 +13,7 @@ const int MASTER = 0;
 
 
 //Program Entry Point
-int main(int argc, char ** argv)
+int main(int argc, char * argv[])
 {	
 	//Initialize MPI
 	int numberOfProcesses = 0, processId = 0;
@@ -23,9 +23,12 @@ int main(int argc, char ** argv)
 
 	//Parse commandline arguments | pargol_console.c	
 	char * inputFile = NULL;
-
 	int xlen = 0, ylen = 0, zlen = 0;	
-	parseArguments(argc, &argv, inputFile, &xlen, &ylen, &zlen);
+	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
+	if (processId == MASTER){
+		printf("task %d sum is %s\n", i, inputFile);
+	}
+
 
 	//Parse inputworld into memory | pargol_input.c
 	int * input;
