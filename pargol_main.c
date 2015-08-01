@@ -119,10 +119,10 @@ int main(int argc, char * argv[])
 			data = current;
 			MPI_Recv(data, count, MPI_INT, prevProcessId, "step 2", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-			data = current;
+			data = current + count;
 			MPI_Send(data, count, MPI_INT, prevProcessId, "step 3", MPI_COMM_WORLD);
 
-			data = &current[count*(chunksize - 2)];
+			data = &current[count*(chunksize - 1)];
 			MPI_Recv(data, count, MPI_INT, nextProcessId, "step 4", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		}
 		else //the rest does the opposite
@@ -133,10 +133,10 @@ int main(int argc, char * argv[])
 			data = &current[count*(chunksize - 2)];
 			MPI_Send(data, count, MPI_INT, nextProcessId, "step 2", MPI_COMM_WORLD);
 			
-			data = &current[count*(chunksize - 2)];
+			data = &current[count*(chunksize - 1)];
 			MPI_Recv(data, count, MPI_INT, nextProcessId, "step 3", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			
-			data = current;
+			data = current + count;
 			MPI_Send(data, count, MPI_INT, prevProcessId, "step 4", MPI_COMM_WORLD);
 		}
 			
