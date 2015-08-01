@@ -34,45 +34,98 @@ int main(int argc, char * argv[])
 	//Calculate distribution values for parallel processing
 	//each process will count the neighbours for a given amount of consecutive zlayers
 	int input_length_total = xlen * ylen * zlen;
-	int zlayer_count_per_process = (zlen / world_size);
-	int extra_zlayers = (zlen % world_size);		
-	if (processId < extra_zlayers)
-	{
-		++zlayer_count_per_process;
-	}
-	zlayer_count_per_process = zlayer_count_per_process + 2; //Plus 2 because it needs space for its neighbouring block's layers
-	int processWorldSize = xlen * ylen * zlayer_count_per_process;
-
-	int * current = calloc(zlayer_count_per_process, sizeof(int));
-	int * next = calloc(zlayer_count_per_process, sizeof(int));
-
 	
+	int chunksize = (zlen / numberOfProcesses);
+	int extra = (zlen % numberOfProcesses);
 
+	//Chunksize information for scatterv; Scattering of initial generation
+	int * scounts = (int*)malloc(numberOfProcesses*sizeof(int));
+	for (int i = 0; i < numberOfProcesses; i++){
+		scounts[i] = chunksize;
+		if (i < extra) scounts[i]++;
+	}
+
+	//Offset information for scatterv; Scattering of initial generation
+	int * displs = (int*)malloc(numberOfProcesses*sizeof(int));
+	displs[0] = 0;
+	for (int i = 1; i < numberOfProcesses; i++){
+		displs[i] = scounts[i] + displs[i - 1];
+	}
+		
+	//Calculating for each process how many layers it must be able to hold (2 for neighbouring slices)
+	if (processId < extra)
+	{
+		++chunksize;
+	}
+	chunksize += 2;	
+
+	//int processWorldSize = xlen * ylen * chunksize;
+	int * current = calloc(xlen * ylen * chunksize, sizeof(int));
+	int * next = calloc(xlen * ylen * chunksize, sizeof(int));
+
+	int * sendbuf = input;
+	int * recvbuf = current + (xlen * ylen);	
+	
+	int MPI_Scatterv(sendbuf, sendcounts, displs, MPI_INT, recvbuf, scounts[processId],	MPI_INT, MASTER, MPI_COMM_WORLD);
+
+	//release parsed world into oblivion
+	free(sendbuf);
 
 	//How long should it evolve
 	int maxGenerationen = 100;
 
-	//Regeln
+	//Rules of Life
 	int minToLive = 4;
 	int maxToLive = 5;
 	int minToResurrect = 5;
 	int maxToResurrect = 5;
 	
-	//TODO >> MASTER ONLY
+	//TODO >> MASTER ONLY >> Output initial configuration and popluation
 	//char * output_name_buf = malloc((100)*sizeof(char)); // max filename length
-	char * addtext = malloc((100)*sizeof(char));
-
-	sprintf(addtext, "Create this file... Date or something - maybe rules here...\n");
-	outputTXT("output_combined.txt", "write", addtext, NULL, xlen, ylen, zlen);
+	//char * addtext = malloc((100)*sizeof(char));
+	//sprintf(addtext, "Create this file... Date or something - maybe rules here...\n");
+	//outputTXT("output_combined.txt", "write", addtext, NULL, xlen, ylen, zlen);
 
 	//Generationen berechnen
 	for (int generationX = 0; generationX < maxGenerationen; generationX++)
-	{
-		sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
-		outputTXT("output_combined.txt", "append", addtext, current, xlen, ylen, zlen);
+	{		
+		//sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
+		//outputTXT("output_combined.txt", "append", addtext, current, xlen, ylen, zlen);
+		
+		//Exchange of front and back z-layers of neigbouhring slices of the cube
+		int * data = NULL;
+		int count = xlen * ylen;
+		
+		if (processId % 2 == 0){
+			data = &current[count*(chunksize - 2)];
+			MPI_Send(data, count, MPI_INT, (processId + 1) % 2,	"step 1", MPI_COMM_WORLD);			
+			
+			data = current;
+			MPI_Recv(data, count, MPI_INT, (processId - 1) % 2, "step 2", MPI_COMM_WORLD);
 
+			data = current;
+			MPI_Send(data, count, MPI_INT, (processId - 1) % 2, "step 3", MPI_COMM_WORLD);
+
+			data = &current[count*(chunksize - 2)];
+			MPI_Recv(data, count, MPI_INT, (processId + 1) % 2, "step 4", MPI_COMM_WORLD);
+		}
+		else{
+			data = current;
+			MPI_Recv(data, count, MPI_INT, (processId - 1) % 2, "step 1", MPI_COMM_WORLD);			
+			
+			data = &current[count*(chunksize - 2)];
+			MPI_Send(data, count, MPI_INT, (processId + 1) % 2, "step 2", MPI_COMM_WORLD);
+			
+			data = &current[count*(chunksize - 2)];
+			MPI_Recv(data, count, MPI_INT, (processId + 1) % 2, "step 3", MPI_COMM_WORLD);
+			
+			data = current;
+			MPI_Send(data, count, MPI_INT, (processId - 1) % 2, "step 4", MPI_COMM_WORLD);
+		}
+			
+		//Each cube calculates its portion
 		population = 0;
-		for (int k = 0; k < zlen; k++)
+		for (int k = 0; k < chunksize; k++)
 		{
 			for (int j = 0; j < ylen; j++)
 			{
@@ -96,10 +149,24 @@ int main(int argc, char * argv[])
 			}
 		}
 
+		//GATHER population
+		int * recbuffer = (int*)malloc(sizeof(int) * numberOfProcesses);
+		MPI_Gather(&population, 1, MPI_INT, recbuffer, 1, MPI_INT, MASTER, MPI_COMM_WORLD);		
+		population = 0;
+		if (processId == MASTER){
+			for (int i = 0; i < numberOfProcesses; i++){
+				population += recbuffer[i];
+				printf("task %d sum is %d\n", i, recbuffer[i]);
+			}
+			printf("Final sum= %d \n", population;
+		}
+		free(recbuffer);
+
 		free(current);
 		current = next;
-		next = calloc(gol_cells_total, sizeof(int));
+		next = calloc(xlen * ylen * chunksize, sizeof(int));
 	}
+	
 	//free(output_name_buf);
 	printf("Finished evolving for %d generations.\n\nPress any key to close this window.", maxGenerationen);
 	getline();
