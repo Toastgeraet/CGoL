@@ -84,7 +84,7 @@ int main(int argc, char * argv[])
 	}	
 
 	//How long should it evolve
-	int maxGenerationen = 100;
+	int maxGenerationen = 6;
 
 	//Rules of Life
 	int minToLive = 4;
@@ -93,16 +93,18 @@ int main(int argc, char * argv[])
 	int maxToResurrect = 5;
 	
 	//TODO >> MASTER ONLY >> Output initial configuration and popluation
-	//char * output_name_buf = malloc((100)*sizeof(char)); // max filename length
-	//char * addtext = malloc((100)*sizeof(char));
-	//sprintf(addtext, "Create this file... Date or something - maybe rules here...\n");
-	//outputTXT("output_combined.txt", "write", addtext, NULL, xlen, ylen, zlen);
+	char * output_name_buf = malloc((100)*sizeof(char)); // max filename length
+	char * addtext = malloc((100)*sizeof(char));
+	sprintf(addtext, "Create this file... Date or something - maybe rules here...\n");
+	sprintf(output_name_buf, "output_rank_%d.txt", processId);
+	
+	outputTXT(output_name_buf, "write", addtext, NULL, xlen, ylen, zlen);
 
 	//Generationen berechnen
 	for (int generationX = 0; generationX < maxGenerationen; generationX++)
 	{		
-		//sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
-		//outputTXT("output_combined.txt", "append", addtext, current, xlen, ylen, zlen);
+		sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
+		outputTXT(output_name_buf, "append", addtext, current, xlen, ylen, zlen);
 		
 		//Exchange of front and back z-layers of neigbouhring slices of the cube
 		int * data = NULL;
@@ -173,9 +175,9 @@ int main(int argc, char * argv[])
 		if (processId == MASTER){
 			for (int i = 0; i < numberOfProcesses; i++){
 				population += recbuffer[i];
-				printf("task %d sum is %d\n", i, recbuffer[i]);
+				printf("Process %d sum is %d\n", i, recbuffer[i]);
 			}
-			printf("Final sum= %d \n", population);
+			printf("Final sum= %d \n\n", population);
 		}
 		free(recbuffer);
 
@@ -184,7 +186,9 @@ int main(int argc, char * argv[])
 		next = calloc(xlen * ylen * chunksize, sizeof(int));
 	}
 	
-	//free(output_name_buf);
+	free(output_name_buf);
+	free(addtext);
+
 	if (processId == MASTER){
 		printf("Finished evolving for %d generations.\n\nPress any key to close this window.", maxGenerationen);
 		getline();
