@@ -42,7 +42,8 @@ int main(int argc, char * argv[])
 
 	//Chunksize information for scatterv; Scattering of initial generation
 	int * scounts = (int*)malloc(numberOfProcesses*sizeof(int));
-	for (int i = 0; i < numberOfProcesses; i++){
+	for (int i = 0; i < numberOfProcesses; i++)
+	{
 		scounts[i] = chunksize;
 		if (i < extra) scounts[i]++;
 	}
@@ -50,7 +51,8 @@ int main(int argc, char * argv[])
 	//Offset information for scatterv; Scattering of initial generation
 	int * displs = (int*)malloc(numberOfProcesses*sizeof(int));
 	displs[0] = 0;
-	for (int i = 1; i < numberOfProcesses; i++){
+	for (int i = 1; i < numberOfProcesses; i++)
+	{
 		displs[i] = scounts[i] + displs[i - 1];
 	}
 		
@@ -69,7 +71,7 @@ int main(int argc, char * argv[])
 	int z_layer_size = (xlen * ylen);
 	int * recvbuf = current + z_layer_size;
 	
-	int MPI_Scatterv(sendbuf, sendcounts, displs, MPI_INT, recvbuf, scounts[processId],	MPI_INT, MASTER, MPI_COMM_WORLD);
+	MPI_Scatterv(sendbuf, sendcounts, displs, MPI_INT, recvbuf, scounts[processId],	MPI_INT, MASTER, MPI_COMM_WORLD);
 
 	//release parsed world into oblivion
 	free(sendbuf);
