@@ -41,7 +41,8 @@ int main(int argc, char * argv[])
 	//Calculate distribution values for parallel processing
 	//each process will count the neighbours for a given amount of consecutive zlayers
 	int input_length_total = xlen * ylen * zlen;
-	
+	int z_layer_size = (xlen * ylen);
+
 	int chunksize = (zlen / numberOfProcesses);
 	int extra = (zlen % numberOfProcesses);
 
@@ -51,6 +52,7 @@ int main(int argc, char * argv[])
 	{
 		scounts[i] = chunksize;
 		if (i < extra) scounts[i]++;
+		scounts[i] *= z_layer_size;
 	}
 
 	//Offset information for scatterv; Scattering of initial generation
@@ -66,6 +68,7 @@ int main(int argc, char * argv[])
 	{
 		++chunksize;
 	}
+	int printsize = chunksize;
 	chunksize += 2;	
 
 	//int processWorldSize = xlen * ylen * chunksize;
@@ -73,7 +76,7 @@ int main(int argc, char * argv[])
 	int * next = calloc(xlen * ylen * chunksize, sizeof(int));
 
 	int * sendbuf = input;
-	int z_layer_size = (xlen * ylen);
+	
 	int * recvbuf = current + z_layer_size;
 	
 	MPI_Scatterv(sendbuf, scounts, displs, MPI_INT, recvbuf, scounts[processId], MPI_INT, MASTER, MPI_COMM_WORLD);
@@ -101,14 +104,16 @@ int main(int argc, char * argv[])
 	outputTXT(output_name_buf, "write", addtext, NULL, xlen, ylen, zlen);
 
 	//Generationen berechnen
+	int count = xlen * ylen;
+
 	for (int generationX = 0; generationX < maxGenerationen; generationX++)
 	{		
 		sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
-		outputTXT(output_name_buf, "append", addtext, current, xlen, ylen, zlen);
+		outputTXT(output_name_buf, "append", addtext, current + count, xlen, ylen, printsize);
 		
 		//Exchange of front and back z-layers of neigbouhring slices of the cube
 		int * data = NULL;
-		int count = xlen * ylen;
+		
 		int nextProcessId = (processId + 1) % numberOfProcesses;
 		int prevProcessId = (processId - 1);
 		prevProcessId = prevProcessId < 0 ? numberOfProcesses + prevProcessId : prevProcessId;
@@ -144,7 +149,7 @@ int main(int argc, char * argv[])
 			
 		//Each cube calculates its portion
 		population = 0;
-		for (int k = 0; k < chunksize; k++)
+		for (int k = 1; k < chunksize - 1; k++)
 		{
 			for (int j = 0; j < ylen; j++)
 			{
