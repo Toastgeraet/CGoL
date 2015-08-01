@@ -8,7 +8,7 @@ int * createWorldFromTxt(char * name, int * population, int xlen, int ylen, int 
 	int * tempworld = malloc(worldsize * sizeof(int));
 	printf("Finished creating world.\n");
 
-	population = 0;
+	* population = 0;
 
 	FILE *fp;
 	int c;
@@ -24,7 +24,7 @@ int * createWorldFromTxt(char * name, int * population, int xlen, int ylen, int 
 		if (c == '0') tempworld[i] = 0;
 		else if (c == '1') {
 			tempworld[i] = 1;
-			population++;
+			* population++;
 		}
 		else i--; //because it's a linebreak char or something			
 	}

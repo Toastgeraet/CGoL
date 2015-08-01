@@ -25,11 +25,7 @@ int main(int argc, char * argv[])
 	char * inputFile = argv[1];
 	int xlen = 0, ylen = 0, zlen = 0;	
 	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
-	if (processId == MASTER){
-		printf("task %d sum is %s\n", 1, inputFile);
-	}
-
-
+	
 	//Parse inputworld into memory | pargol_input.c
 	int * input;
 	int population = 0;
@@ -37,6 +33,11 @@ int main(int argc, char * argv[])
 	if (processId == MASTER){
 		input = createWorldFromTxt(inputFile, &population, xlen, ylen, zlen);
 	}
+
+	if (processId == MASTER){
+		printf("Initial population is %d\n", population);
+	}
+
 
 	//Calculate distribution values for parallel processing
 	//each process will count the neighbours for a given amount of consecutive zlayers
