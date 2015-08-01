@@ -44,7 +44,7 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 	printf("Starting to parse arguments...\n");
 	printf("Program name: %s\n", argv[0]);
 	printf("Input file: %s\n", argv[1]);
-	inFile = argv[1];
+	//inFile = argv[1];
 	if(argc < 8)
 	{
 		usage();

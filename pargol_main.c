@@ -22,9 +22,9 @@ int main(int argc, char * argv[])
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 
 	//Parse commandline arguments | pargol_console.c	
-	char * inputFile = NULL;
+	char * inputFile = argv[1];
 	int xlen = 0, ylen = 0, zlen = 0;	
-	parseArguments(argc, argv, &inputFile, &xlen, &ylen, &zlen);
+	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
 	if (processId == MASTER){
 		printf("task %d sum is %s\n", 1, inputFile);
 	}
