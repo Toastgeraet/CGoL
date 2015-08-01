@@ -163,7 +163,7 @@ int main(int argc, char * argv[])
 				population += recbuffer[i];
 				printf("task %d sum is %d\n", i, recbuffer[i]);
 			}
-			printf("Final sum= %d \n", population;
+			printf("Final sum= %d \n", population);
 		}
 		free(recbuffer);
 
