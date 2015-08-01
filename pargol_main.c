@@ -71,7 +71,7 @@ int main(int argc, char * argv[])
 	int z_layer_size = (xlen * ylen);
 	int * recvbuf = current + z_layer_size;
 	
-	MPI_Scatterv(sendbuf, sendcounts, displs, MPI_INT, recvbuf, scounts[processId],	MPI_INT, MASTER, MPI_COMM_WORLD);
+	MPI_Scatterv(sendbuf, scounts, displs, MPI_INT, recvbuf, scounts[processId], MPI_INT, MASTER, MPI_COMM_WORLD);
 
 	//release parsed world into oblivion
 	free(sendbuf);
