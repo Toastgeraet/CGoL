@@ -107,32 +107,36 @@ int main(int argc, char * argv[])
 		//Exchange of front and back z-layers of neigbouhring slices of the cube
 		int * data = NULL;
 		int count = xlen * ylen;
+		int nextProcessId = (processId + 1) % numberOfProcesses;
+		int prevProcessId = (processId - 1) % numberOfProcesses;
 		
-		if (processId % 2 == 0){
+		if (processId % 2 == 0) //every other process does this
+		{ 
 			data = &current[count*(chunksize - 2)];
-			MPI_Send(data, count, MPI_INT, (processId + 1) % 2,	"step 1", MPI_COMM_WORLD);			
+			MPI_Send(data, count, MPI_INT, nextProcessId, "step 1", MPI_COMM_WORLD);
 			
 			data = current;
-			MPI_Recv(data, count, MPI_INT, (processId - 1) % 2, "step 2", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, prevProcessId, "step 2", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
 			data = current;
-			MPI_Send(data, count, MPI_INT, (processId - 1) % 2, "step 3", MPI_COMM_WORLD);
+			MPI_Send(data, count, MPI_INT, prevProcessId, "step 3", MPI_COMM_WORLD);
 
 			data = &current[count*(chunksize - 2)];
-			MPI_Recv(data, count, MPI_INT, (processId + 1) % 2, "step 4", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, nextProcessId, "step 4", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		}
-		else{
+		else //the rest does the opposite
+		{ 
 			data = current;
-			MPI_Recv(data, count, MPI_INT, (processId - 1) % 2, "step 1", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, prevProcessId, "step 1", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			
 			data = &current[count*(chunksize - 2)];
-			MPI_Send(data, count, MPI_INT, (processId + 1) % 2, "step 2", MPI_COMM_WORLD);
+			MPI_Send(data, count, MPI_INT, nextProcessId, "step 2", MPI_COMM_WORLD);
 			
 			data = &current[count*(chunksize - 2)];
-			MPI_Recv(data, count, MPI_INT, (processId + 1) % 2, "step 3", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, nextProcessId, "step 3", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			
 			data = current;
-			MPI_Send(data, count, MPI_INT, (processId - 1) % 2, "step 4", MPI_COMM_WORLD);
+			MPI_Send(data, count, MPI_INT, prevProcessId, "step 4", MPI_COMM_WORLD);
 		}
 			
 		//Each cube calculates its portion
