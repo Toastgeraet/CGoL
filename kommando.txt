@@ -1,1 +1,0 @@
-./main input.txt -x 5 -y 5 -z 5
