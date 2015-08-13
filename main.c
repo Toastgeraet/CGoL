@@ -68,19 +68,22 @@ int count_neighbours(int * world, int xlen, int ylen, int zlen, int x, int y, in
 					xo = xlen;
 				else if (x + i > xlen)
 					xo = 0;
-				else xo = x + i;
+				else 
+					xo = x + i;
 
 				if (y + j < 0)
 					yo = ylen;
 				else if (y + j > ylen)
 					yo = 0;
-				else yo = y + j
+				else 
+					yo = y + j;
 
 				if (z + k < 0)
 					zo = zlen;
 				else if (z + k > zlen)
 					zo = 0;
-				else zo = z + k;
+				else 
+					zo = z + k;
 
 				int index = offset(xo, yo, zo, xlen, ylen);
 				if (i == 0 && j == 0 && k == 0) continue;
