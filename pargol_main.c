@@ -21,6 +21,17 @@ const int STEP_4 = 130;
 
 int numberOfProcesses = 0, processId = 0;
 
+//How long should it evolve
+const int maxGenerationen = 10;
+
+//Rules of Life
+const int minToLive = 4;
+const int maxToLive = 5;
+const int minToResurrect = 5;
+const int maxToResurrect = 5;
+
+void evolveWorld(char * inputFile, int xlen, int ylen, int zlen);
+
 //Program Entry Point
 int main(int argc, char * argv[])
 {
@@ -88,8 +99,8 @@ int main(int argc, char * argv[])
 	MPI_Finalize();
 }
 
-
-void evolveWorld(char * inputFile, int xlen, int ylen, int zlen){
+void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
+{
 	//Parse inputworld into memory | pargol_input.c
 	int * input;
 	int population = 0;
@@ -149,15 +160,6 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen){
 	if (processId == MASTER){
 		free(sendbuf);
 	}
-
-	//How long should it evolve
-	int maxGenerationen = 6;
-
-	//Rules of Life
-	int minToLive = 4;
-	int maxToLive = 5;
-	int minToResurrect = 5;
-	int maxToResurrect = 5;
 
 	//TODO >> MASTER ONLY >> Output initial configuration and popluation
 	char * output_name_buf = malloc((100)*sizeof(char)); // max filename length
