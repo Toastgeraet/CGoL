@@ -37,7 +37,7 @@ int main(int argc, char * argv[])
 	struct stat s;
 	if (stat(inputFileArgument, &s) == 0)
 	{
-		if (s.st_mode & S_IFDIR)
+		if (s.st_mode & _S_IFDIR)
 		{
 			//it's a directory
 			DIR *dir;
@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
 				return EXIT_FAILURE;
 			}			
 		}
-		else if (s.st_mode & S_IFREG)
+		else if (s.st_mode & _S_IFREG)
 		{
 			//it's a file
 			inputFile = inputFileArgument;
