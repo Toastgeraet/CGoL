@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
 	char * inputFileArgument = argv[1]; //this should be done in parsearguments - confused by pointer logic
 	char * inputFile;
 	int xlen = 0, ylen = 0, zlen = 0;
-	
+
 	//Initialize MPI	
 	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
@@ -47,48 +47,49 @@ int main(int argc, char * argv[])
 
 	if (processId == MASTER){
 		parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
+	}
 
-		//Check if inputfile is a world or an inputfiles directory
-		struct stat s;
-		if (stat(inputFileArgument, &s) == 0)
+	//Check if inputfile is a world or an inputfiles directory
+	struct stat s;
+	if (stat(inputFileArgument, &s) == 0)
+	{
+		if (s.st_mode & S_IFDIR)
 		{
-			if (s.st_mode & S_IFDIR)
-			{
-				//it's a directory
-				DIR *dir;
+			//it's a directory
+			DIR *dir;
 
-				struct dirent *ent;
-				if ((dir = opendir(inputFileArgument)) != NULL) {
-					/* print all the files and directories within directory */
-					while ((ent = readdir(dir)) != NULL) {
-						printf("%s\n", ent->d_name);
-						evolveWorld(ent->d_name, xlen, ylen, zlen);
-					}
-					closedir(dir);
+			struct dirent *ent;
+			if ((dir = opendir(inputFileArgument)) != NULL) {
+				/* print all the files and directories within directory */
+				while ((ent = readdir(dir)) != NULL) {
+					printf("%s\n", ent->d_name);
+					evolveWorld(ent->d_name, xlen, ylen, zlen);
 				}
-				else {
-					/* could not open directory */
-					perror("");
-					return EXIT_FAILURE;
-				}
+				closedir(dir);
 			}
-			else if (s.st_mode & S_IFREG)
-			{
-				//it's a file
-				inputFile = inputFileArgument;
-				printf("Evolving %s ...\n", inputFile);
-				evolveWorld(inputFile, xlen, ylen, zlen);
+			else {
+				/* could not open directory */
+				perror("");
+				return EXIT_FAILURE;
 			}
-			else
-			{
-				//something else
-			}
+		}
+		else if (s.st_mode & S_IFREG)
+		{
+			//it's a file
+			inputFile = inputFileArgument;
+			printf("Evolving %s ...\n", inputFile);
+			evolveWorld(inputFile, xlen, ylen, zlen);
 		}
 		else
 		{
-			//error
+			//something else
 		}
 	}
+	else
+	{
+		//error
+	}
+
 
 
 	if (processId == MASTER){
