@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <pargol_create.h>
+#include "pargol_create.h"
 
 char * getline(void) {
 	char * line = malloc(100), *linep = line;
