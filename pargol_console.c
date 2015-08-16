@@ -51,6 +51,7 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 	if (strcmp(argv[1], "-create") == 0)
 	{		
 		rmrf("inputfiles");
+		mkdir("inputfiles");
 
 		int count = atoi(argv[2]);
 		printf("Creating %d testworlds...", count);
