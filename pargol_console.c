@@ -37,7 +37,7 @@ char * getline(void) {
 void usage(void)
 {
 	printf("Usage:\n");
-	printf("<inputfile> -x <value> -y <value> -z <value>\n");	
+	printf("<inputfile> -x <value> -y <value> -z <value>\n");
 	exit(8);
 }
 
@@ -46,11 +46,8 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 	printf("Program name: %s\n", argv[0]);
 	printf("Input file: %s\n", argv[1]);
 	//inFile = argv[1];
-
-	printf("Argument 1");
-	printf(argv[1]);
-
-	if (argv[1] == "-create")
+		
+	if (strcmp(argv[1], "-create") == 0)
 	{
 		int count = atoi(argv[2]);
 		int x = atoi(argv[3]);
@@ -61,7 +58,7 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		printf("test");
 	}
 
-	if(argc < 8)
+	if (argc < 8)
 	{
 		usage();
 	}
