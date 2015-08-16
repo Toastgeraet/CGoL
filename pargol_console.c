@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pargol_create.h>
 
 char * getline(void) {
 	char * line = malloc(100), *linep = line;
@@ -45,6 +46,18 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 	printf("Program name: %s\n", argv[0]);
 	printf("Input file: %s\n", argv[1]);
 	//inFile = argv[1];
+
+	if (argv[2] == '-create')
+	{
+		int count = atoi(argv[3]);
+		int x = atoi(argv[4]);
+		int y = atoi(argv[5]);
+		int z = atoi(argv[6]);
+
+		createWorld(count, x, y, z);
+
+	}
+
 	if(argc < 8)
 	{
 		usage();
