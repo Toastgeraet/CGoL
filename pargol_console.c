@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pargol_create.h"
+#include "file_io.h"
 
 char * getline(void) {
 	char * line = malloc(100), *linep = line;
