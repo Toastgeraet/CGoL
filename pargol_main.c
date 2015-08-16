@@ -77,7 +77,7 @@ int main(int argc, char * argv[])
 				//it's a file
 				inputFile = inputFileArgument;
 				printf("Evolving %s ...\n", inputFile);
-				evolveWorld(inputfile, xlen, ylen, zlen);
+				evolveWorld(inputFile, xlen, ylen, zlen);
 			}
 			else
 			{
