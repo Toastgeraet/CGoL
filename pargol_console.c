@@ -53,7 +53,7 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		rmrf("inputfiles");
 
 		int count = atoi(argv[2]);
-		printf("Creating %d testworlds...");
+		printf("Creating %d testworlds...", count);
 		int x = atoi(argv[3]);
 		int y = atoi(argv[4]);
 		int z = atoi(argv[5]);
