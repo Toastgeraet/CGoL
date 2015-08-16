@@ -53,11 +53,13 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		
 	if (strcmp(argv[1], "-create") == 0)
 	{		
+		printf("Deleting inputfiles directory and contents.\n");
 		rmrf("inputfiles");
+		printf("Creating new inputfiles directory.\n");
 		mkdir("inputfiles", 0700);
 
 		int count = atoi(argv[2]);
-		printf("Creating %d testworlds...", count);
+		printf("Creating %d testworlds...\n", count);
 		int x = atoi(argv[3]);
 		int y = atoi(argv[4]);
 		int z = atoi(argv[5]);
@@ -66,8 +68,13 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		{
 			createWorld(c, x, y, z);
 		}
+		printf("Finished creating %d Test Worlds.\n\n", count);
+		
+		printf("Deleting outputfiles directory and contents\n.");
+		rmrf("outputfiles");
+		printf("Creating new outputfiles directory\n.");
+		mkdir("outputfiles", 0700);
 
-		printf("Task finished.");
 		return;
 	}
 

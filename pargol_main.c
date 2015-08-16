@@ -3,6 +3,8 @@
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <dirent.h>
 #include "pargol_console.h"
 #include "pargol_logic.h"
 #include "pargol_input.h"
@@ -19,8 +21,10 @@ const int STEP_4 = 130;
 int main(int argc, char * argv[])
 {	
 	//Parse commandline arguments | pargol_console.c	
-	char * inputFile = argv[1]; //this should be done in parsearguments - confused by pointer logic
-	int xlen = 0, ylen = 0, zlen = 0;
+	char * inputFileArgument = argv[1]; //this should be done in parsearguments - confused by pointer logic
+	char * inputFile;
+	int xlen = 0, ylen = 0, zlen = 0;	
+
 	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
 
 	//Initialize MPI
@@ -29,6 +33,48 @@ int main(int argc, char * argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 	
+	//Check if inputfile is a world or an inputfiles directory
+	struct stat s;
+	if (stat(inputFileArgument, &s) == 0)
+	{
+		if (s.st_mode & S_IFDIR)
+		{
+			//it's a directory
+			DIR *dir;
+
+			struct dirent *ent;
+			if ((dir = opendir(inputFileArgument)) != NULL) {
+				/* print all the files and directories within directory */
+				while ((ent = readdir(dir)) != NULL) {
+					printf("%s\n", ent->d_name);
+					//evolveWorld(ent->d_name, xlen, ylen, zlen);
+				}
+				closedir(dir);
+			}
+			else {
+				/* could not open directory */
+				perror("");
+				return EXIT_FAILURE;
+			}			
+		}
+		else if (s.st_mode & S_IFREG)
+		{
+			//it's a file
+			inputFile = inputFileArgument;
+			printf("Evolving %s ...\n", inputFile);
+			//evolveWorld(inputfile, xlen, ylen, zlen);
+		}
+		else
+		{
+			//something else
+		}
+	}
+	else
+	{
+		//error
+	}
+
+
 	//Parse inputworld into memory | pargol_input.c
 	int * input;
 	int population = 0;
