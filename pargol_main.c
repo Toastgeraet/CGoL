@@ -39,15 +39,15 @@ int main(int argc, char * argv[])
 	char * inputFileArgument = argv[1]; //this should be done in parsearguments - confused by pointer logic
 	char * inputFile;
 	int xlen = 0, ylen = 0, zlen = 0;
-
-	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
-
+	
 	//Initialize MPI	
 	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 
 	if (processId == MASTER){
+		parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
+
 		//Check if inputfile is a world or an inputfiles directory
 		struct stat s;
 		if (stat(inputFileArgument, &s) == 0)
