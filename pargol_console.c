@@ -47,7 +47,7 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 	printf("Input file: %s\n", argv[1]);
 	//inFile = argv[1];
 
-	if (argv[1] == '-create')
+	if (argv[1] == "-create")
 	{
 		int count = atoi(argv[2]);
 		int x = atoi(argv[3]);
@@ -55,6 +55,7 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		int z = atoi(argv[5]);
 
 		createWorld(count, x, y, z);
+		printf("test");
 	}
 
 	if(argc < 8)
