@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dir.h>
+#include <sys/stat.h>
 #include "pargol_create.h"
 #include "file_io.h"
 
