@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <dirent.h>
 #include "pargol_console.h"
 #include "pargol_logic.h"
