@@ -12,12 +12,14 @@
 #include "pargol_input.h"
 #include "pargol_output.h"
 
-//MPI Variables (and Constants)
+//MPI Variables and Constants
 const int MASTER = 0;
 const int STEP_1 = 127;
 const int STEP_2 = 128;
 const int STEP_3 = 129;
 const int STEP_4 = 130;
+
+int numberOfProcesses = 0, processId = 0;
 
 //Program Entry Point
 int main(int argc, char * argv[])
@@ -29,8 +31,7 @@ int main(int argc, char * argv[])
 
 	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
 
-	//Initialize MPI
-	int numberOfProcesses = 0, processId = 0;
+	//Initialize MPI	
 	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
