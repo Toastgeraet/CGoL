@@ -1,4 +1,4 @@
-#define _XOPEN_SOURCE 600
+#define _XOPEN_SOURCE 500
 #include <stdio.h>
 #include <ftw.h>
 #include <unistd.h>
