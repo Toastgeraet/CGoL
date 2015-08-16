@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-void createWorld(int number, int xlen, int ylen, int zlen)
+int createWorld(int number, int xlen, int ylen, int zlen)
 {
 	char * name = malloc((100)*sizeof(char));
 	sprintf(name, "inputfiles\\world%d.txt", number);
