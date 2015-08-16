@@ -10,7 +10,10 @@
 
 //MPI Variables (and Constants)
 const int MASTER = 0;
-
+const int STEP_1 = 127;
+const int STEP_2 = 128;
+const int STEP_3 = 129;
+const int STEP_4 = 130;
 
 //Program Entry Point
 int main(int argc, char * argv[])
@@ -121,30 +124,30 @@ int main(int argc, char * argv[])
 		if (processId % 2 == 0) //every other process does this
 		{ 
 			data = &current[count*(chunksize - 2)];
-			MPI_Send(data, count, MPI_INT, nextProcessId, "step 1", MPI_COMM_WORLD);
+			MPI_Send(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
 			
 			data = current;
-			MPI_Recv(data, count, MPI_INT, prevProcessId, "step 2", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
 			data = current + count;
-			MPI_Send(data, count, MPI_INT, prevProcessId, "step 3", MPI_COMM_WORLD);
+			MPI_Send(data, count, MPI_INT, prevProcessId, STEP_3, MPI_COMM_WORLD);
 
 			data = &current[count*(chunksize - 1)];
-			MPI_Recv(data, count, MPI_INT, nextProcessId, "step 4", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		}
 		else //the rest does the opposite
 		{ 
 			data = current;
-			MPI_Recv(data, count, MPI_INT, prevProcessId, "step 1", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			
 			data = &current[count*(chunksize - 2)];
-			MPI_Send(data, count, MPI_INT, nextProcessId, "step 2", MPI_COMM_WORLD);
+			MPI_Send(data, count, MPI_INT, nextProcessId, STEP_2, MPI_COMM_WORLD);
 			
 			data = &current[count*(chunksize - 1)];
-			MPI_Recv(data, count, MPI_INT, nextProcessId, "step 3", MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			
 			data = current + count;
-			MPI_Send(data, count, MPI_INT, prevProcessId, "step 4", MPI_COMM_WORLD);
+			MPI_Send(data, count, MPI_INT, prevProcessId, STEP_4, MPI_COMM_WORLD);
 		}
 			
 		//Each cube calculates its portion
@@ -184,9 +187,10 @@ int main(int argc, char * argv[])
 			}
 			printf("Final sum= %d \n\n", population);
 		}
-		free(recbuffer);
 
+		free(recbuffer);
 		free(current);
+		
 		current = next;
 		next = calloc(xlen * ylen * chunksize, sizeof(int));
 	}

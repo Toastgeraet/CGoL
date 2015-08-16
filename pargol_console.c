@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "pargol_create.h"
 
 char * getline(void) {
@@ -48,14 +49,22 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 	//inFile = argv[1];
 		
 	if (strcmp(argv[1], "-create") == 0)
-	{
+	{		
+		rmrf("inputfiles");
+
 		int count = atoi(argv[2]);
+		printf("Creating %d testworlds...");
 		int x = atoi(argv[3]);
 		int y = atoi(argv[4]);
 		int z = atoi(argv[5]);
 
-		createWorld(count, x, y, z);
-		printf("test");
+		for (int c = 0; c < count; c++)
+		{
+			createWorld(c, x, y, z);
+		}
+
+		printf("Task finished.");
+		return;
 	}
 
 	if (argc < 8)
