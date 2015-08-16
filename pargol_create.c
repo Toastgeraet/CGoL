@@ -2,10 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-int createWorld(int number, int xlen, int ylen, int zlen)
+void createWorld(int number, int xlen, int ylen, int zlen)
 {
 	char * name = malloc((100)*sizeof(char));
-	sprintf(name, "inputfiles\world%d.txt", number);
+	sprintf(name, "inputfiles\\world%d.txt", number);
 		
 
 	FILE *fp = fopen(name, "w");
@@ -39,6 +39,5 @@ int createWorld(int number, int xlen, int ylen, int zlen)
 	}
 
 	free(name);
-
 	return 0;
 }
