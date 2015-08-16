@@ -5,7 +5,7 @@
 int createWorld(int number, int xlen, int ylen, int zlen)
 {
 	char * name = malloc((100)*sizeof(char));
-	sprintf(name, "inputfiles\\world%d.txt", number);
+	sprintf(name, "inputfiles/world%d.txt", number);
 	
 	FILE *fp = fopen(name, "w");
 
