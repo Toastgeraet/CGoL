@@ -25,7 +25,7 @@ int createWorld(int number, int xlen, int ylen, int zlen)
 				for (int i = 0; i < xlen; i++)
 				{
 					int random = rand();
-					if (random % 2 == 1)
+					if (random % 4 == 0)
 						fputc('1', fp);
 					else
 						fputc('0', fp);
