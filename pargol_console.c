@@ -41,11 +41,11 @@ char * getline(void) {
 void usage(void)
 {
 	printf("Usage:\n");
-	printf("<inputfile> -x <value> -y <value> -z <value>\n");
+	printf("<inputfile> -x <value> -y <value> -z <value> -g <gens to evolve>\n");
 	exit(8);
 }
 
-void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * ylen, int * zlen){
+void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * ylen, int * zlen, int * maxGens){
 	printf("Starting to parse arguments...\n");
 	printf("Program name: %s\n", argv[0]);
 	printf("Input file: %s\n", argv[1]);	
@@ -63,10 +63,19 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		int x = atoi(argv[3]);
 		int y = atoi(argv[4]);
 		int z = atoi(argv[5]);
+		float s;
+		if (argc == 7)
+		{
+			s = atof(argv[6]); //s is the spawnrate - constraints: 0 < s <= 1
+		}
+		else
+		{
+			s = 0.25f; //default spawnrate
+		}		
 
 		for (int c = 0; c < count; c++)
 		{
-			createWorld(c, x, y, z);
+			createWorld(c, x, y, z, s);
 		}
 		printf("Finished creating %d Test Worlds.\n\n", count);
 		
@@ -75,7 +84,7 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		printf("Creating new outputfiles directory.\n");
 		mkdir("outputfiles", 0700);
 		printf("All set to go. Run pargol as follows:\n");
-		printf("mpiexec -np [numberOfProcesses] ./pargol inputfiles -x %d -y %d -z %d:\n", x, y, z);
+		printf("mpiexec -np [numberOfProcesses] ./pargol inputfiles -x %d -y %d -z %d -g [generations per world (default = 100)]:\n", x, y, z);
 		
 		//close program
 		exit(0);
@@ -108,6 +117,11 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 			case 'z':
 				printf("z = %s\n", *str);
 				*zlen = (int)strtol(*str, (char **)NULL, 10);
+				break;
+
+			case 'g':
+				printf("Worlds will evolve for %s generations.\n", *str);
+				*maxGens = (int)strtol(*str, (char **)NULL, 10);
 				break;
 
 			default:

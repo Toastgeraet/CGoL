@@ -2,13 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 
-int createWorld(int number, int xlen, int ylen, int zlen)
-{
+//spawnrate must be greater than 0 and less than or equal 1
+int createWorld(int number, int xlen, int ylen, int zlen, float spawnrate)
+{	
 	char * name = malloc((100)*sizeof(char));
 	sprintf(name, "inputfiles/world%d.txt", number);
 	
-	FILE *fp = fopen(name, "w");
+	int spawnrate_converted = (int)(1 / spawnrate);
+	printf("Randomly spawning approximately every %dth cell.\n", spawnrate_converted);
 
+	FILE *fp = fopen(name, "w");
 	if (fp == NULL)
 	{
 		printf("Datei %s konnte nicht geoeffnet werden.\n", name);
@@ -25,7 +28,7 @@ int createWorld(int number, int xlen, int ylen, int zlen)
 				for (int i = 0; i < xlen; i++)
 				{
 					int random = rand();
-					if (random % 4 == 0)
+					if (random % spawnrate_converted == 0)
 						fputc('1', fp);
 					else
 						fputc('0', fp);

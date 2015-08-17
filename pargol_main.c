@@ -22,9 +22,6 @@ const int STEP_4 = 130;
 
 int numberOfProcesses = 0, processId = 0;
 
-//How long should it evolve
-const int maxGenerationen = 10;
-
 //Rules of Life
 const int minToLive = 4;
 const int maxToLive = 5;
@@ -34,6 +31,8 @@ const int maxToResurrect = 5;
 void evolveWorld(char * inputFile, int xlen, int ylen, int zlen);
 char *replace_str(char *str, char *orig, char *rep, int start);
 
+int maxGenerationen = 100;
+
 //Program Entry Point
 int main(int argc, char * argv[])
 {
@@ -41,16 +40,17 @@ int main(int argc, char * argv[])
 	char * inputFileArgument = argv[1]; //this should be done in parsearguments - confused by pointer logic
 	char * inputFile = NULL;
 	int xlen = 0, ylen = 0, zlen = 0;
-
+		
 	//Initialize MPI	
 	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 
-	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
-	printf("MAIN DEBUG AFTER parseArguments:\n");
+	//parsing of inputfile not working in parsearguments? -seg fault??? done in main for now
+	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen, &maxGenerationen);
+	/*printf("MAIN DEBUG AFTER parseArguments:\n");
 	printf("inputFileArgument: %s\n", inputFileArgument);
-	printf("inputFile: %s\n", inputFile);
+	printf("inputFile: %s\n", inputFile);*/
 
 	//Check if inputfile is a world or an inputfiles directory
 	struct stat s;
@@ -194,32 +194,40 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		prevProcessId = prevProcessId < 0 ? numberOfProcesses + prevProcessId : prevProcessId;
 
 		if (processId % 2 == 0) //every other process does this
-		{
+		{			
 			data = &current[count*(chunksize - 2)];
-			MPI_Send(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
-
-			data = current;
-			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-			data = current + count;
-			MPI_Send(data, count, MPI_INT, prevProcessId, STEP_3, MPI_COMM_WORLD);
-
-			data = &current[count*(chunksize - 1)];
-			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		}
-		else //the rest does the opposite
-		{
+			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
+			printf("STEP 1: Process %d has send to process %d\n", processId, nextProcessId);
+						
 			data = current;
 			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
+			printf("STEP 2: Process %d has received from process %d\n", processId, prevProcessId);
+						
+			data = current + count;
+			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
+			printf("STEP 3: Process %d has send to process %d\n", processId, prevProcessId);
+						
+			data = &current[count*(chunksize - 1)];
+			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			printf("STEP 4: Process %d has received from process %d\n", processId, nextProcessId);
+		}
+		else //the rest does the opposite
+		{			
+			data = current;
+			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			printf("STEP 1: Process %d has received from process %d\n", processId, prevProcessId);
+						
 			data = &current[count*(chunksize - 2)];
-			MPI_Send(data, count, MPI_INT, nextProcessId, STEP_2, MPI_COMM_WORLD);
+			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
+			printf("STEP 2: Process %d has send to process %d\n", processId, nextProcessId);
 
 			data = &current[count*(chunksize - 1)];
-			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			printf("STEP 3: Process %d has received from process %d\n", processId, prevProcessId);
 
 			data = current + count;
-			MPI_Send(data, count, MPI_INT, prevProcessId, STEP_4, MPI_COMM_WORLD);
+			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
+			printf("STEP 4: Process %d has send to process %d\n", processId, prevProcessId);
 		}
 
 		//Each cube calculates its portion
@@ -253,6 +261,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		MPI_Gather(&population, 1, MPI_INT, recbuffer, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
 		population = 0;
 		if (processId == MASTER){
+			printf("Generation %d :\n", generationX);
 			for (int i = 0; i < numberOfProcesses; i++){
 				population += recbuffer[i];
 				printf("Process %d sum is %d\n", i, recbuffer[i]);
