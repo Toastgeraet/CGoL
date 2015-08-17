@@ -37,18 +37,18 @@ int main(int argc, char * argv[])
 {
 	//Parse commandline arguments | pargol_console.c	
 	char * inputFileArgument = argv[1]; //this should be done in parsearguments - confused by pointer logic
-	char * inputFile;
+	char * inputFile = NULL;
 	int xlen = 0, ylen = 0, zlen = 0;
-		
-	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
-	printf("MAIN DEBUG AFTER parseArguments:\n");
-	printf("inputFileArgument: %s\n", inputFileArgument);
-	printf("inputFile: %s\n", inputFile);
-
+	
 	//Initialize MPI	
 	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
+
+	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen);
+	printf("MAIN DEBUG AFTER parseArguments:\n");
+	printf("inputFileArgument: %s\n", inputFileArgument);
+	printf("inputFile: %s\n", inputFile);
 	
 	//Check if inputfile is a world or an inputfiles directory
 	struct stat s;
@@ -58,6 +58,7 @@ int main(int argc, char * argv[])
 		{
 			int bufsize = 0;
 			char ** buffer = (char**)malloc(1*sizeof(int));
+			
 			//it's a directory
 			if (processId == MASTER)
 			{
@@ -66,10 +67,14 @@ int main(int argc, char * argv[])
 				if ((dir = opendir(inputFileArgument)) != NULL) { //unneccessary double check if it is a dir?! different apis - clean up later
 					/* print all the files and directories within directory */
 					while ((ent = readdir(dir)) != NULL) {
+						if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
+						{
+							continue;
+						}
 						++bufsize;
 						printf("%s\n", ent->d_name);						
-						realloc(buffer, bufsize);
-						buffer[bufsize - 1] = ent->d_name;
+						//realloc(buffer, bufsize);
+						//buffer[bufsize - 1] = ent->d_name;
 						//evolveWorld(ent->d_name, xlen, ylen, zlen);
 					}
 					closedir(dir);
@@ -85,13 +90,16 @@ int main(int argc, char * argv[])
 			else
 			{
 				MPI_Bcast(&bufsize, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
+				printf("ProcessID: %d - Bufsize: %d \n", processId, bufsize);
 				realloc(buffer, bufsize);
 				MPI_Bcast(buffer, bufsize, MPI_INT, MASTER, MPI_COMM_WORLD);
 			}			
+
 			//start to evolve the worlds
 			for (int world = 0; world < bufsize; world++)
 			{
-				evolveWorld(buffer[world], xlen, ylen, zlen);
+				printf("ProcessID: %d - WorldId: %d - WorldName: %s\n", processId, bufsize, buffer[world]);
+				//evolveWorld(buffer[world], xlen, ylen, zlen);
 			}
 		}
 		else if (s.st_mode & S_IFREG)
