@@ -76,7 +76,9 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		mkdir("outputfiles", 0700);
 		printf("All set to go. Run pargol as follows:\n");
 		printf("mpiexec -np [numberOfProcesses] ./pargol inputfiles -x %d -y %d -z %d:\n", x, y, z);
-		return;
+		
+		//close program
+		exit(0);
 	}
 
 	//'Usual' startup parameters
