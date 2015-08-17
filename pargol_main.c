@@ -191,43 +191,36 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 
 		int nextProcessId = (processId + 1) % numberOfProcesses;
 		int prevProcessId = (processId - 1);
-		prevProcessId = prevProcessId < 0 ? numberOfProcesses + prevProcessId : prevProcessId;
+		prevProcessId = prevProcessId < 0 ? numberOfProcesses + prevProcessId : prevProcessId; //because % is not the modulo but the remainder operator
 
-		if (processId % 2 == 0) //every other process does this
+		//Communication pattern
+		if (processId % 2 == 0) //even processes
 		{			
 			data = &current[count*(chunksize - 2)];
 			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
-			printf("STEP 1: Process %d has send to process %d\n", processId, nextProcessId);
 						
 			data = current;
 			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			printf("STEP 2: Process %d has received from process %d\n", processId, prevProcessId);
 						
 			data = current + count;
 			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
-			printf("STEP 3: Process %d has send to process %d\n", processId, prevProcessId);
 						
 			data = &current[count*(chunksize - 1)];
 			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			printf("STEP 4: Process %d has received from process %d\n", processId, nextProcessId);
 		}
-		else //the rest does the opposite
+		else //odd processes
 		{			
 			data = current;
 			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			printf("STEP 1: Process %d has received from process %d\n", processId, prevProcessId);
-						
+									
 			data = &current[count*(chunksize - 2)];
 			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
-			printf("STEP 2: Process %d has send to process %d\n", processId, nextProcessId);
-
+			
 			data = &current[count*(chunksize - 1)];
 			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			printf("STEP 3: Process %d has received from process %d\n", processId, prevProcessId);
 
 			data = current + count;
 			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
-			printf("STEP 4: Process %d has send to process %d\n", processId, prevProcessId);
 		}
 
 		//Each cube calculates its portion
