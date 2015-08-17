@@ -48,9 +48,9 @@ void usage(void)
 void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * ylen, int * zlen){
 	printf("Starting to parse arguments...\n");
 	printf("Program name: %s\n", argv[0]);
-	printf("Input file: %s\n", argv[1]);
-	//inFile = argv[1];
-		
+	printf("Input file: %s\n", argv[1]);	
+	
+	//This should be moved to a different file. creating of directories got nothing to do with console...
 	if (strcmp(argv[1], "-create") == 0)
 	{		
 		printf("Deleting inputfiles directory and contents.\n");
@@ -78,12 +78,14 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		return;
 	}
 
+	//'Usual' startup parameters
 	if (argc < 8)
 	{
 		usage();
 	}
 	else
 	{
+		inFile = argv[1];
 		while ((argc > 2) && (argv[2][0] == '-'))
 		{
 			char ** str = &argv[3];
