@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -31,6 +32,7 @@ const int minToResurrect = 5;
 const int maxToResurrect = 5;
 
 void evolveWorld(char * inputFile, int xlen, int ylen, int zlen);
+char *replace_str(char *str, char *orig, char *rep, int start);
 
 //Program Entry Point
 int main(int argc, char * argv[])
@@ -39,7 +41,7 @@ int main(int argc, char * argv[])
 	char * inputFileArgument = argv[1]; //this should be done in parsearguments - confused by pointer logic
 	char * inputFile = NULL;
 	int xlen = 0, ylen = 0, zlen = 0;
-	
+
 	//Initialize MPI	
 	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
@@ -49,57 +51,36 @@ int main(int argc, char * argv[])
 	printf("MAIN DEBUG AFTER parseArguments:\n");
 	printf("inputFileArgument: %s\n", inputFileArgument);
 	printf("inputFile: %s\n", inputFile);
-	
+
 	//Check if inputfile is a world or an inputfiles directory
 	struct stat s;
 	if (stat(inputFileArgument, &s) == 0)
 	{
 		if (s.st_mode & S_IFDIR)
 		{
-			int bufsize = 0;
-			char ** buffer = (char**)malloc(1*sizeof(int));
-			
 			//it's a directory
-			if (processId == MASTER)
-			{
-				DIR *dir;
-				struct dirent *ent;
-				if ((dir = opendir(inputFileArgument)) != NULL) { //unneccessary double check if it is a dir?! different apis - clean up later
-					/* print all the files and directories within directory */
-					while ((ent = readdir(dir)) != NULL) {
-						if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
-						{
-							continue;
-						}
-						++bufsize;
-						printf("%s\n", ent->d_name);						
-						//realloc(buffer, bufsize);
-						//buffer[bufsize - 1] = ent->d_name;
-						//evolveWorld(ent->d_name, xlen, ylen, zlen);
-					}
-					closedir(dir);
-					MPI_Bcast(&bufsize, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
-					MPI_Bcast(buffer, bufsize, MPI_INT, MASTER, MPI_COMM_WORLD);
-				}
-				else {
-					/* could not open directory */
-					perror("");
-					return EXIT_FAILURE;
-				}
-			}
-			else
-			{
-				MPI_Bcast(&bufsize, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
-				printf("ProcessID: %d - Bufsize: %d \n", processId, bufsize);
-				realloc(buffer, bufsize);
-				MPI_Bcast(buffer, bufsize, MPI_INT, MASTER, MPI_COMM_WORLD);
-			}			
+			DIR *dir;
+			struct dirent *ent;
+			if ((dir = opendir(inputFileArgument)) != NULL) { //unneccessary double check if it is a dir?! different apis - clean up later
+				
+				char * concatenationBuffer = (char*)malloc(100*sizeof(char));
 
-			//start to evolve the worlds
-			for (int world = 0; world < bufsize; world++)
-			{
-				printf("ProcessID: %d - WorldId: %d - WorldName: %s\n", processId, bufsize, buffer[world]);
-				//evolveWorld(buffer[world], xlen, ylen, zlen);
+				/* print all the files and directories within directory */
+				while ((ent = readdir(dir)) != NULL) {
+					if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
+					{
+						continue;
+					}										
+					sprintf(concatenationBuffer, "inputfiles/%s", ent->d_name);
+					printf("ProcessId: %d Filename: %s\n", processId, concatenationBuffer);
+					evolveWorld(concatenationBuffer, xlen, ylen, zlen);
+				}
+				closedir(dir);
+			}
+			else {
+				/* could not open directory */
+				perror("");
+				return EXIT_FAILURE;
 			}
 		}
 		else if (s.st_mode & S_IFREG)
@@ -192,7 +173,8 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	char * output_name_buf = malloc((100)*sizeof(char)); // max filename length
 	char * addtext = malloc((100)*sizeof(char));
 	sprintf(addtext, "Create this file... Date or something - maybe rules here...\n");
-	sprintf(output_name_buf, "output_rank_%d.txt", processId);
+	sprintf(output_name_buf, "outputfiles/%s_process_%d.txt", inputFile, processId);
+	replace_str(output_name_buf, "inputfiles/", "", 0);
 
 	outputTXT(output_name_buf, "write", addtext, NULL, xlen, ylen, zlen);
 
@@ -288,4 +270,26 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	free(output_name_buf);
 	free(addtext);
 	return;
+}
+
+//Credit goes to Tudor from stackoverflow who edited this
+//stackoverflow.com/questions/8137244/best-way-to-replace-a-part-of-string-by-another-in-c
+char *replace_str(char *str, char *orig, char *rep, int start)
+{
+	static char temp[4096];
+	static char buffer[4096];
+	char *p;
+
+	strcpy(temp, str + start);
+
+	if (!(p = strstr(temp, orig)))  // Is 'orig' even in 'temp'?
+		return temp;
+
+	strncpy(buffer, temp, p - temp); // Copy characters from 'temp' start to 'orig' str
+	buffer[p - temp] = '\0';
+
+	sprintf(buffer + (p - temp), "%s%s", rep, p + strlen(orig));
+	sprintf(str + start, "%s", buffer);
+
+	return str;
 }
