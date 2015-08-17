@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
 		if (s.st_mode & S_IFDIR)
 		{
 			int bufsize = 0;
-			char * buffer[] = malloc(1*sizeof(int));
+			char ** buffer = (char**)malloc(1*sizeof(int));
 			//it's a directory
 			if (processId == MASTER)
 			{
