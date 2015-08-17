@@ -70,11 +70,12 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		}
 		printf("Finished creating %d Test Worlds.\n\n", count);
 		
-		printf("Deleting outputfiles directory and contents\n.");
+		printf("Deleting outputfiles directory and contents.\n");
 		rmrf("outputfiles");
-		printf("Creating new outputfiles directory\n.");
+		printf("Creating new outputfiles directory.\n");
 		mkdir("outputfiles", 0700);
-
+		printf("All set to go. Run pargol as follows:\n");
+		printf("mpiexec -np [numberOfProcesses] ./pargol inputfiles -x %d -y %d -z %d:\n", x, y, z);
 		return;
 	}
 
