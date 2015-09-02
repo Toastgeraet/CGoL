@@ -38,6 +38,7 @@ int stencils;
 clock_t begin, end;
 double time_spent;
 int numberOfWorlds = 0;
+time_t start = time(NULL);
 
 //Program Entry Point
 int main(int argc, char * argv[])
@@ -120,7 +121,8 @@ int main(int argc, char * argv[])
 		printf("Finished evolving %d worlds for %d generations each.\n", numberOfWorlds, maxGenerationen);
 		printf("Performed a total of %d stencil operations.\n", xlen*ylen*zlen*maxGenerationen*numberOfWorlds);
 		printf("Program execution took %.2f seconds.\n", time_spent);
-		printf("That is %d stencil operations per second.\n", (xlen*ylen*zlen*maxGenerationen)/time_spent);
+		printf("That is %f stencil operations per second.\n", (xlen*ylen*zlen*maxGenerationen*numberOfWorlds) / time_spent);				
+		printf("Wallclock execution time: %.2f\n", (double)((time(NULL) - start)/1000));
 		printf("Press any key to close this window.\n");
 
 		getline();
