@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <dirent.h>
 #include "pargol_console.h"
 #include "pargol_logic.h"
@@ -32,6 +33,11 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen);
 char *replace_str(char *str, char *orig, char *rep, int start);
 
 int maxGenerationen = 100;
+int stencils;
+
+clock_t begin, end;
+double time_spent;
+int numberOfWorlds = 0;
 
 //Program Entry Point
 int main(int argc, char * argv[])
@@ -46,6 +52,11 @@ int main(int argc, char * argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 
+	if (processId == MASTER)
+	{
+		begin = clock();
+	}
+		
 	//parsing of inputfile not working in parsearguments? -seg fault??? done in main for now
 	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen, &maxGenerationen);
 	/*printf("MAIN DEBUG AFTER parseArguments:\n");
@@ -74,6 +85,7 @@ int main(int argc, char * argv[])
 					sprintf(concatenationBuffer, "inputfiles/%s", ent->d_name);
 					printf("ProcessId: %d Filename: %s\n", processId, concatenationBuffer);
 					evolveWorld(concatenationBuffer, xlen, ylen, zlen);
+					numberOfWorlds++;
 				}
 				closedir(dir);
 			}
@@ -101,9 +113,19 @@ int main(int argc, char * argv[])
 	}
 
 	if (processId == MASTER){
-		printf("Finished evolving for %d generations.\n\nPress any key to close this window.\n\n", maxGenerationen);
+		
+		end = clock();
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+		printf("Finished evolving %d worlds for %d generations each.\n", numberOfWorlds, maxGenerationen);
+		printf("Performed a total of %d stencil operations.\n", xlen*ylen*zlen*maxGenerationen*numberOfWorlds);
+		printf("Program execution took %.2f seconds.\n", time_spent);
+		printf("That is %d stencil operations per second.\n", (xlen*ylen*zlen*maxGenerationen)/time_spent);
+		printf("Press any key to close this window.\n");
+
 		getline();
 	}
+
 	MPI_Finalize();
 }
 
