@@ -38,7 +38,7 @@ int stencils;
 clock_t begin, end;
 double time_spent;
 int numberOfWorlds = 0;
-time_t start = time(NULL);
+time_t start;
 
 //Program Entry Point
 int main(int argc, char * argv[])
@@ -56,6 +56,7 @@ int main(int argc, char * argv[])
 	if (processId == MASTER)
 	{
 		begin = clock();
+		start = time(NULL);
 	}
 		
 	//parsing of inputfile not working in parsearguments? -seg fault??? done in main for now
