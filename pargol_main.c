@@ -100,6 +100,7 @@ int main(int argc, char * argv[])
 		else if (s.st_mode & S_IFREG)
 		{
 			//it's a file
+			numberOfWorlds++;
 			inputFile = inputFileArgument;
 			printf("Evolving %s ...\n", inputFile);
 			evolveWorld(inputFile, xlen, ylen, zlen);
