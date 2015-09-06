@@ -188,9 +188,8 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 
 	int * recvbuf = current + z_layer_size;
 
-	if(numberOfProcesses > 1){
-		MPI_Scatterv(sendbuf, scounts, displs, MPI_INT, recvbuf, scounts[processId], MPI_INT, MASTER, MPI_COMM_WORLD);
-	}
+	MPI_Scatterv(sendbuf, scounts, displs, MPI_INT, recvbuf, scounts[processId], MPI_INT, MASTER, MPI_COMM_WORLD);
+
 	//release parsed world into oblivion
 	if (processId == MASTER){
 		free(sendbuf);
@@ -220,36 +219,34 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		int prevProcessId = (processId - 1);
 		prevProcessId = prevProcessId < 0 ? numberOfProcesses + prevProcessId : prevProcessId; //because % is not the modulo but the remainder operator
 
-		if(numberOfProcesses > 1){
-			//Communication pattern
-			if (processId % 2 == 0) //even processes
-			{			
-				data = &current[count*(chunksize - 2)];
-				MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
-							
-				data = current;
-				MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-							
-				data = current + count;
-				MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
-							
-				data = &current[count*(chunksize - 1)];
-				MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			}
-			else //odd processes
-			{			
-				data = current;
-				MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-										
-				data = &current[count*(chunksize - 2)];
-				MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
-				
-				data = &current[count*(chunksize - 1)];
-				MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		//Communication pattern
+		if (processId % 2 == 0) //even processes
+		{			
+			data = &current[count*(chunksize - 2)];
+			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
+						
+			data = current;
+			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+						
+			data = current + count;
+			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
+						
+			data = &current[count*(chunksize - 1)];
+			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+		else //odd processes
+		{			
+			data = current;
+			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+									
+			data = &current[count*(chunksize - 2)];
+			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
+			
+			data = &current[count*(chunksize - 1)];
+			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-				data = current + count;
-				MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
-			}
+			data = current + count;
+			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
 		}
 
 		//Each cube calculates its portion
