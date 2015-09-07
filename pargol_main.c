@@ -215,7 +215,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	if(processId == MASTER)
 	{
 		printf("Evolving World %d : [_________________________]", numberOfWorlds); //change to current world variable
-		//fflush(stdout);
+		fflush(stdout);
 	}
 	
 	for (int generationX = 0; generationX < maxGenerationen; generationX++)
@@ -234,7 +234,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 					printf("_");
 				}
 				printf("]");
-				//fflush(stdout);
+				fflush(stdout);
 			}
 		}
 		
