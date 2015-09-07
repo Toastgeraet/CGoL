@@ -147,14 +147,10 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	//each process will count the neighbours for a given amount of consecutive zlayers
 	int input_length_total = xlen * ylen * zlen;
 	int z_layer_size = (xlen * ylen);
-	int chunksize = z_layer_size;
-	int printsize = chunksize;
 	
-	//int processWorldSize = xlen * ylen * chunksize;
-	int * current = calloc(xlen * ylen * chunksize, sizeof(int));
-	int * next = calloc(xlen * ylen * chunksize, sizeof(int));
-	int * recvbuf = current + z_layer_size;
-
+	int * current = input;
+	int * next = calloc(xlen * ylen * zlen, sizeof(int));
+	
 	//TODO >> MASTER ONLY >> Output initial configuration and popluation
 	char * output_name_buf = malloc((100)*sizeof(char)); // max filename length
 	char * addtext = malloc((100)*sizeof(char));
@@ -193,14 +189,14 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		
 		//this will be printed into the outputfiles
 		sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
-		outputTXT(output_name_buf, "append", addtext, current + count, xlen, ylen, printsize);
+		outputTXT(output_name_buf, "append", addtext, current + count, xlen, ylen, zlen);
 
 		//Exchange of front and back z-layers of neigbouhring slices of the cube
 		int * data = NULL;
 
 		//Each cube calculates its portion
 		population = 0;
-		for (int k = 1; k < chunksize - 1; k++)
+		for (int k = 1; k < zlen - 1; k++)
 		{
 			for (int j = 0; j < ylen; j++)
 			{
@@ -227,7 +223,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		free(current);
 
 		current = next;
-		next = calloc(xlen * ylen * chunksize, sizeof(int));
+		next = calloc(xlen * ylen * zlen, sizeof(int));
 	}
 	
 		printf("\rEvolving World %d : [=========================] - done.\n", numberOfWorlds); //change to current world variable
