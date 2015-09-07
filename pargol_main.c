@@ -127,9 +127,9 @@ int main(int argc, char * argv[])
 		printf("Program execution took %.2f seconds.\n", time_spent);
 		printf("That is %f stencil operations per second.\n", (xlen*ylen*zlen*maxGenerationen*numberOfWorlds) / time_spent);				
 		printf("Wallclock execution time: %.2f\n", (double)((time(NULL) - start)));
-		printf("Press any key to close this window.\n");
+		//printf("Press any key to close this window.\n");
 
-		getline();
+		//getline();
 	}
 
 	MPI_Finalize();
