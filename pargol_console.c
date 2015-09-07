@@ -40,15 +40,15 @@ char * getline(void) {
 
 void usage(void)
 {
-	printf("Usage:\n");
-	printf("<inputfile> -x <value> -y <value> -z <value> -g <gens to evolve>\n");
+	//printf("Usage:\n");
+	//printf("<inputfile> -x <value> -y <value> -z <value> -g <gens to evolve>\n");
 	exit(8);
 }
 
 void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * ylen, int * zlen, int * maxGens){
-	printf("Starting to parse arguments...\n");
-	printf("Program name: %s\n", argv[0]);
-	printf("Input file: %s\n", argv[1]);	
+	//printf("Starting to parse arguments...\n");
+	//printf("Program name: %s\n", argv[0]);
+	//printf("Input file: %s\n", argv[1]);	
 	
 	//This should be moved to a different file. creating of directories got nothing to do with console...
 	if (strcmp(argv[1], "-create") == 0)
@@ -88,12 +88,12 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		
 		//close program
 		exit(0);
-	}
+	} //end create //non mpi
 
 	//'Usual' startup parameters
 	if (argc < 8)
 	{
-		usage();
+		//usage();
 	}
 	else
 	{
@@ -105,33 +105,33 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 			switch (argv[2][1])
 			{
 			case 'x':
-				printf("x = %s\n", *str);
+				//printf("x = %s\n", *str);
 				*xlen = (int)strtol(*str, (char **)NULL, 10);
 				break;
 
 			case 'y':
-				printf("y = %s\n", *str);
+				//printf("y = %s\n", *str);
 				*ylen = (int)strtol(*str, (char **)NULL, 10);
 				break;
 
 			case 'z':
-				printf("z = %s\n", *str);
+				//printf("z = %s\n", *str);
 				*zlen = (int)strtol(*str, (char **)NULL, 10);
 				break;
 
 			case 'g':
-				printf("Worlds will evolve for %s generations.\n", *str);
+				//printf("Worlds will evolve for %s generations.\n", *str);
 				*maxGens = (int)strtol(*str, (char **)NULL, 10);
 				break;
 
 			default:
-				printf("Wrong Argument: %s\n", argv[1]);
+				//printf("Wrong Argument: %s\n", argv[1]);
 				usage();
 			}
 
 			argv += 2;
 			argc -= 2;
 		}
-		printf("Finished parsing of arguments.\n\n");
+		//printf("Finished parsing of arguments.\n\n");
 	}
 }
