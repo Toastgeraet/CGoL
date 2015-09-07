@@ -4,7 +4,7 @@
 # See "man sbatch" for other time formats.
 #SBATCH --time=5
 # Run 4 tasks on 2 nodes.
-#SBATCH -N 1
+#SBATCH -N 1 -n 2
 # Output goes to job.out, error messages to job.err.
 #SBATCH --error=job_pargol.err --output=job_pargol.out
 	
