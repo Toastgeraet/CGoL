@@ -3,17 +3,17 @@
 
 int * createWorldFromTxt(char * name, int * population, int xlen, int ylen, int zlen)
 {
-	printf("Creating space for intial world...\n");
+	//printf("Creating space for intial world...\n");
 	int worldsize = xlen*ylen*zlen;
 	int * tempworld = malloc(worldsize * sizeof(int));
-	printf("Finished creating world.\n");
+	//printf("Finished creating world.\n");
 
 	* population = 0;
 
 	FILE *fp;
 	int c;
 
-	printf("Starting to parse initial world from file...\n");
+	//printf("Starting to parse initial world from file...\n");
 	if (!(fp = fopen(name, "r"))) {
 		perror(name);
 		exit(1);
@@ -29,7 +29,7 @@ int * createWorldFromTxt(char * name, int * population, int xlen, int ylen, int 
 		else i--; //because it's a linebreak char or something			
 	}
 	fclose(fp);
-	printf("Finished creating world and parsing input file.\n\n");
-	printf("Initial population = %d\n", * population);
+	//printf("Finished creating world and parsing input file.\n\n");
+	//printf("Initial population = %d\n", * population);
 	return tempworld;
 }

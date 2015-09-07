@@ -155,8 +155,9 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	char * output_name_buf = malloc((100)*sizeof(char)); // max filename length
 	char * addtext = malloc((100)*sizeof(char));
 	sprintf(addtext, "Create this file... Date or something - maybe rules here...\n");
-	sprintf(output_name_buf, "outputfiles/%s_process_%d.txt", inputFile, processId);
+	sprintf(output_name_buf, "outputfiles/%s_single.txt", inputFile);
 	replace_str(output_name_buf, "inputfiles/", "", 0);
+	replace_str(output_name_buf, ".txt", "", 0);
 
 	outputTXT(output_name_buf, "write", addtext, NULL, xlen, ylen, zlen);
 
@@ -190,11 +191,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		//this will be printed into the outputfiles
 		sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
 		outputTXT(output_name_buf, "append", addtext, current + count, xlen, ylen, zlen);
-
-		//Exchange of front and back z-layers of neigbouhring slices of the cube
-		int * data = NULL;
-
-		//Each cube calculates its portion
+				
 		population = 0;
 		for (int k = 1; k < zlen - 1; k++)
 		{
