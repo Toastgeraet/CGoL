@@ -7,5 +7,8 @@ vampol: pargol_main.c pargol_console.c pargol_logic.c pargol_input.c pargol_outp
 clean:
 	rm -rf pargol
 	rm -rf ddt.out
-	rm -rf input*
-	rm -rf output*
+	rm -rf inputfiles*
+	rm -rf outputfiles*
+	rm -rf *.z
+	rm -rf vampol*
+	
