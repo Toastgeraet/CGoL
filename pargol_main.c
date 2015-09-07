@@ -85,9 +85,11 @@ int main(int argc, char * argv[])
 						continue;
 					}										
 					sprintf(concatenationBuffer, "inputfiles/%s", ent->d_name);
-					printf("ProcessId: %d Filename: %s\n", processId, concatenationBuffer);
-					evolveWorld(concatenationBuffer, xlen, ylen, zlen);
+					if (processId == MASTER){
+						printf("ProcessId: %d Filename: %s\n", processId, concatenationBuffer);
+					}
 					numberOfWorlds++;
+					evolveWorld(concatenationBuffer, xlen, ylen, zlen);					
 				}
 				closedir(dir);
 			}
@@ -207,8 +209,36 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	//Generationen berechnen
 	int count = xlen * ylen;
 
+	//for status output
+	int advancement_counter = 0, advancement_target = 25;
+	char * advancement_print_buf = malloc((100)*sizeof(char));	
+	if(processId == MASTER)
+	{
+		printf("Evolving World %d : [_________________________]", numberOfWorlds); //change to current world variable
+		fflush(stdout);
+	}
+	
 	for (int generationX = 0; generationX < maxGenerationen; generationX++)
 	{
+		if(processId == MASTER)
+		{
+			if(generationX > 0 && generationX/(maxGenerationen/advancement_target) > advancement_counter)
+			{
+				advancement_counter++;
+				printf("\rEvolving World %d : [", numberOfWorlds); //change to current world variable
+				for(int adv = 0; adv < advancement_counter-1; adv++){
+					printf("=");
+				}
+				printf(">");
+				for(int rest = 0; rest < advancement_target - advancement_counter; rest++){
+					printf("_");
+				}
+				printf("]");
+				fflush(stdout);
+			}
+		}
+		
+		//this will be printed into the outputfiles
 		sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
 		outputTXT(output_name_buf, "append", addtext, current + count, xlen, ylen, printsize);
 
@@ -280,12 +310,12 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		MPI_Gather(&population, 1, MPI_INT, recbuffer, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
 		population = 0;
 		if (processId == MASTER){
-			printf("Generation %d :\n", generationX);
+			//printf("Generation %d :\n", generationX);
 			for (int i = 0; i < numberOfProcesses; i++){
 				population += recbuffer[i];
-				printf("Process %d sum is %d\n", i, recbuffer[i]);
+				//printf("Process %d sum is %d\n", i, recbuffer[i]);
 			}
-			printf("Final sum= %d \n\n", population);
+			//printf("Final sum= %d \n\n", population);
 		}
 
 		free(recbuffer);
@@ -294,7 +324,13 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		current = next;
 		next = calloc(xlen * ylen * chunksize, sizeof(int));
 	}
+	
+	if(processId == MASTER)
+	{
+		printf("\rEvolving World %d : [=========================] - done.\n", numberOfWorlds); //change to current world variable
+	}
 
+	free(advancement_print_buf);
 	free(output_name_buf);
 	free(addtext);
 	return;
