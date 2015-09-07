@@ -222,7 +222,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	{
 		if(processId == MASTER)
 		{
-			if(generationX > 0 && generationX/(maxGenerationen/advancement_target) > advancement_counter)
+			if(generationX > 0 && (int)((float)generationX/(float)((float)maxGenerationen/(float)advancement_target)) > advancement_counter)
 			{
 				advancement_counter++;
 				printf("\rEvolving World %d : [", numberOfWorlds); //change to current world variable
