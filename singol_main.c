@@ -190,7 +190,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		
 		//this will be printed into the outputfiles
 		sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
-		outputTXT(output_name_buf, "append", addtext, current + count, xlen, ylen, zlen);
+		outputTXT(output_name_buf, "append", addtext, current, xlen, ylen, zlen);
 				
 		population = 0;
 		for (int k = 1; k < zlen - 1; k++)
