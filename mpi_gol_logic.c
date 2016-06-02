@@ -1,4 +1,4 @@
-#include "pargol_logic.h"
+#include "mpi_gol_logic.h"
 
 int offset(int x, int y, int z, int xlen, int ylen) 
 {

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "pargol_create.h"
+#include "mpi_gol_create.h"
 #include "file_io.h"
 
 
@@ -83,8 +83,8 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		rmrf("outputfiles");
 		printf("Creating new outputfiles directory.\n");
 		mkdir("outputfiles", 0700);
-		printf("All set to go. Run pargol as follows:\n");
-		printf("mpiexec -np [numberOfProcesses] ./pargol inputfiles -x %d -y %d -z %d -g [generations per world (default = 100)]:\n", x, y, z);
+		printf("All set to go. Run mpi_gol as follows:\n");
+		printf("mpiexec -np [numberOfProcesses] ./mpi_gol inputfiles -x %d -y %d -z %d -g [generations per world (default = 100)]:\n", x, y, z);
 		
 		//close program
 		exit(0);

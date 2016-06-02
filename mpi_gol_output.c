@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<string.h>
-#include "pargol_logic.h"
+#include "mpi_gol_logic.h"
 
 int outputTXT(char * name, char * mode, char * text, int * world, int xlen, int ylen, int zlen)
 {
