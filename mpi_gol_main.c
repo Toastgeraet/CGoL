@@ -110,8 +110,6 @@ int main(int argc, char * argv[])
 }
 
 void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
-
-	//Parse inputworld into memory | mpi_gol_input.c
 	int * input;
 	int population = 0;
 
@@ -123,15 +121,12 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 		printf("Initial population is %d\n", population);
 	}
 
-	//Calculate distribution values for parallel processing
-	//each process will count the neighbours for a given amount of consecutive zlayers
 	int input_length_total = xlen * ylen * zlen;
 	int z_layer_size = (xlen * ylen);
 
 	int chunksize = (zlen / numberOfProcesses);
 	int extra = (zlen % numberOfProcesses);
 
-	//Chunksize information for scatterv; Scattering of initial generation
 	int * scounts = (int*)malloc(numberOfProcesses*sizeof(int));
 	for (int i = 0; i < numberOfProcesses; i++)
 	{
@@ -140,7 +135,6 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 		scounts[i] *= z_layer_size;
 	}
 
-	//Offset information for scatterv; Scattering of initial generation
 	int * displs = (int*)malloc(numberOfProcesses*sizeof(int));
 	displs[0] = 0;
 	for (int i = 1; i < numberOfProcesses; i++)
@@ -148,7 +142,6 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 		displs[i] = scounts[i - 1] + displs[i - 1];
 	}
 
-	//Calculating for each process how many layers it must be able to hold (2 for neighbouring slices)
 	if (processId < extra)
 	{
 		++chunksize;
@@ -219,7 +212,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 		}
 		
 		// в файл
-		sprintf(addtext, "Поколение: %d\nНаселение: %d\n", 
+		sprintf(addtext, "Generation: %d\nPopulation: %d\n",
 			generationX, population);
 
 		outputTXT(output_name_buf, "append", addtext, 
