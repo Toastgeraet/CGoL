@@ -6,7 +6,7 @@ int offset(int x, int y, int z, int xlen, int ylen) {
 	return (z * xlen * ylen) + (y * xlen) + x; 
 }
 
-int count_neighbours(int * world, 
+int count_neighbours(int *world, 
 	int xlen, int ylen, int zlen, 
 	int x, int y, int z) {
 
@@ -65,3 +65,4 @@ int count_neighbours(int * world,
 
 	return count;
 }
+

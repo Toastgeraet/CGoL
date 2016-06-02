@@ -28,7 +28,7 @@ const int maxToLive = 5;
 const int minToResurrect = 5;
 const int maxToResurrect = 5;
 
-void evolveWorld(char * inputFile, int xlen, int ylen, int zlen);
+void evolveWorld(char *inputFile, int xlen, int ylen, int zlen);
 
 // заменить позже плюсовой функцией
 char *replace_str(char *str, char *orig, char *rep, int start);
@@ -44,8 +44,8 @@ time_t start;
 
 int main(int argc, char * argv[])
 {
-	char * inputFileArgument = argv[1];
-	char * inputFile = NULL;
+	char *inputFileArgument = argv[1];
+	char *inputFile = NULL;
 	int xlen = 0, ylen = 0, zlen = 0;
 		
 	MPI_Init(NULL, NULL);
@@ -64,7 +64,7 @@ int main(int argc, char * argv[])
 			struct dirent *ent;
 			if ((dir = opendir(inputFileArgument)) != NULL) {
                 
-				char * concatenationBuffer = (char*)malloc(100*sizeof(char));
+				char *concatenationBuffer = (char*)malloc(100*sizeof(char));
 
 				while ((ent = readdir(dir)) != NULL) {
 					if (strcmp(ent->d_name, ".") == 0 
@@ -107,8 +107,9 @@ int main(int argc, char * argv[])
 	MPI_Finalize();
 }
 
-void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
-	int * input;
+void evolveWorld(char *inputFile, int xlen, int ylen, int zlen) {
+
+	int *input;
 	int population = 0;
 
 	if (processId == MASTER) {
@@ -125,7 +126,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 	int chunksize = (zlen / numberOfProcesses);
 	int extra = (zlen % numberOfProcesses);
 
-	int * scounts = (int*)malloc(numberOfProcesses*sizeof(int));
+	int *scounts = (int*)malloc(numberOfProcesses*sizeof(int));
 	for (int i = 0; i < numberOfProcesses; i++)
 	{
 		scounts[i] = chunksize;
@@ -133,26 +134,24 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 		scounts[i] *= z_layer_size;
 	}
 
-	int * displs = (int*)malloc(numberOfProcesses*sizeof(int));
+	int *displs = (int*)malloc(numberOfProcesses*sizeof(int));
 	displs[0] = 0;
-	for (int i = 1; i < numberOfProcesses; i++)
-	{
+	for (int i = 1; i < numberOfProcesses; i++)	{
 		displs[i] = scounts[i - 1] + displs[i - 1];
 	}
 
-	if (processId < extra)
-	{
+	if (processId < extra) {
 		++chunksize;
 	}
 	int printsize = chunksize;
 	chunksize += 2;
 
-	int * current = calloc(xlen * ylen * chunksize, sizeof(int));
-	int * next = calloc(xlen * ylen * chunksize, sizeof(int));
+	int *current = calloc(xlen * ylen * chunksize, sizeof(int));
+	int *next = calloc(xlen * ylen * chunksize, sizeof(int));
 
-	int * sendbuf = input;
+	int *sendbuf = input;
 
-	int * recvbuf = current + z_layer_size;
+	int *recvbuf = current + z_layer_size;
 
 	MPI_Scatterv(sendbuf, scounts, displs, 
 		MPI_INT, recvbuf, scounts[processId], 
@@ -163,23 +162,22 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 	}
 
     // TODO: исправить выходные файлы [+]
-	char * output_name_buf = malloc((100)*sizeof(char));
-	char * addtext = malloc((100)*sizeof(char));
+	char *output_name_buf = malloc((100)*sizeof(char));
+	char *addtext = malloc((100)*sizeof(char));
 	sprintf(output_name_buf, "outputfiles/%s_process_%d.txt", 
 		inputFile, processId);
 	replace_str(output_name_buf, "inputfiles/", "", 0);
     // [-]
 
-	outputTXT(output_name_buf, "write", addtext, NULL, xlen, ylen, zlen);
+	outputTxt(output_name_buf, "write", addtext, NULL, xlen, ylen, zlen);
 
 	// Вычисляем поколения
 	int count = xlen * ylen;
 
 	/////
 	int advancement_counter = 0, advancement_target = 25;
-	char * advancement_print_buf = malloc((100)*sizeof(char));	
-	if(processId == MASTER)
-	{
+	char *advancement_print_buf = malloc((100)*sizeof(char));	
+	if(processId == MASTER)	{
 		printf("Evolving World %d : [_________________________]", 
 			numberOfWorlds);
 		fflush(stdout);
@@ -213,11 +211,11 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 		sprintf(addtext, "Generation: %d\nPopulation: %d\n",
 			generationX, population);
 
-		outputTXT(output_name_buf, "append", addtext, 
+		outputTxt(output_name_buf, "append", addtext, 
 			current + count, xlen, ylen, printsize);
 
 		//Обмен передней и заднего Z-слоz в соседних сечениях куба
-		int * data = NULL;
+		int *data = NULL;
 
 		int nextProcessId = (processId + 1) % numberOfProcesses;
 		int prevProcessId = (processId - 1);
@@ -285,7 +283,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 		}
 
 		// Сбор населения
-		int * recbuffer = (int*)malloc(sizeof(int) * numberOfProcesses);
+		int *recbuffer = (int*)malloc(sizeof(int) * numberOfProcesses);
 
 		MPI_Gather(&population, 1, MPI_INT, 
 			recbuffer, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
@@ -323,8 +321,9 @@ char *replace_str(char *str, char *orig, char *rep, int start) {
 
 	strcpy(temp, str + start);
 
-	if (!(p = strstr(temp, orig)))
+	if (!(p = strstr(temp, orig))){
 		return temp;
+	}
 
 	strncpy(buffer, temp, p - temp);
 	buffer[p - temp] = '\0';
