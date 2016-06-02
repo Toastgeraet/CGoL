@@ -232,7 +232,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
 		int prevProcessId = (processId - 1);
 
 		prevProcessId = prevProcessId < 0 ? 
-			numberOfProcesses + prevProcessId : prevProcessId; //because % is not the modulo but the remainder operator
+			numberOfProcesses + prevProcessId : prevProcessId;
 
 		// Свящь между процессами
 		if (processId % 2 == 0)	{			
