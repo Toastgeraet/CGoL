@@ -1,40 +1,40 @@
 // Created by Kolesnikov S.S., Vecherkin B.I.
 
-#define _CRT_SECURE_NO_WARNINGS
-#define _XOPEN_SOURCE 600
-
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <time.h>
 #include <dirent.h>
+
 #include "mpi_gol_console.h"
 #include "mpi_gol_logic.h"
 #include "mpi_gol_input.h"
 #include "mpi_gol_output.h"
 
-//MPI Variables and Constants
 const int MASTER = 0;
 const int STEP_1 = 127;
 const int STEP_2 = 128;
 const int STEP_3 = 129;
 const int STEP_4 = 130;
 
-int numberOfProcesses = 0, processId = 0;
+int numberOfProcesses = 0;
+int processId = 0;
 
-//Rules of Life
+// Правила игры
 const int minToLive = 4;
 const int maxToLive = 5;
 const int minToResurrect = 5;
 const int maxToResurrect = 5;
 
 void evolveWorld(char * inputFile, int xlen, int ylen, int zlen);
+
+// заменить позже плюсовой функцией
 char *replace_str(char *str, char *orig, char *rep, int start);
 
-int maxGenerationen = 100;
+// Максимальное колво поколений
+int maxGenerations = 100;
 int stencils;
 
 clock_t begin, end;
@@ -42,45 +42,31 @@ double time_spent;
 int numberOfWorlds = 0;
 time_t start;
 
-//Program Entry Point
 int main(int argc, char * argv[])
 {
-	//Parse commandline arguments | mpi_gol_console.c	
-	char * inputFileArgument = argv[1]; //this should be done in parsearguments - confused by pointer logic
+	char * inputFileArgument = argv[1];
 	char * inputFile = NULL;
 	int xlen = 0, ylen = 0, zlen = 0;
 		
-	//Initialize MPI	
 	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
 	MPI_Comm_rank(MPI_COMM_WORLD, &processId);
 
-	if (processId == MASTER)
-	{
-		begin = clock();
-		start = time(NULL);
-	}
-		
-	//parsing of inputfile not working in parsearguments? -seg fault??? done in main for now
-	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen, &maxGenerationen);
-	/*printf("MAIN DEBUG AFTER parseArguments:\n");
-	printf("inputFileArgument: %s\n", inputFileArgument);
-	printf("inputFile: %s\n", inputFile);*/
+	parseArguments(argc, argv, inputFile, &xlen, &ylen, &zlen, &maxGenerations);
 
-	//Check if inputfile is a world or an inputfiles directory
+	// Проверяю входной файл на корректность
 	struct stat s;
 	if (stat(inputFileArgument, &s) == 0)
 	{
-		if (s.st_mode & S_IFDIR)
+		if (s.st_mode & S_IFDIR) // тип файла (также флаги доступа) & директория
 		{
-			//it's a directory
+			// если директория
 			DIR *dir;
 			struct dirent *ent;
-			if ((dir = opendir(inputFileArgument)) != NULL) { //unneccessary double check if it is a dir?! different apis - clean up later
-				
+			if ((dir = opendir(inputFileArgument)) != NULL) {
+                
 				char * concatenationBuffer = (char*)malloc(100*sizeof(char));
 
-				/* print all the files and directories within directory */
 				while ((ent = readdir(dir)) != NULL) {
 					if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
 					{
@@ -96,14 +82,14 @@ int main(int argc, char * argv[])
 				closedir(dir);
 			}
 			else {
-				/* could not open directory */
+				// ошибка открытия директории
 				perror("");
 				return EXIT_FAILURE;
 			}
 		}
-		else if (s.st_mode & S_IFREG)
+		else if (s.st_mode & S_IFREG) // тип файла - regular
 		{
-			//it's a file
+			// если файл
 			numberOfWorlds++;
 			inputFile = inputFileArgument;
 			printf("Evolving %s ...\n", inputFile);
@@ -111,27 +97,17 @@ int main(int argc, char * argv[])
 		}
 		else
 		{
-			//something else
+			//
 		}
 	}
 	else
 	{
-		//error
+		// ошибка
 	}
 
-	if (processId == MASTER){
-		
-		end = clock();
-		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-
-		printf("Finished evolving %d worlds for %d generations each.\n", numberOfWorlds, maxGenerationen);
-		printf("Performed a total of %d stencil operations.\n", xlen*ylen*zlen*maxGenerationen*numberOfWorlds);
-		printf("Program execution took %.2f seconds.\n", time_spent);
-		printf("That is %f stencil operations per second.\n", (xlen*ylen*zlen*maxGenerationen*numberOfWorlds) / time_spent);				
-		printf("Wallclock execution time: %.2f\n", (double)((time(NULL) - start)));
-		//printf("Press any key to close this window.\n");
-
-		//getline();
+	if (processId == MASTER)
+    {
+		printf("Finished evolving %d worlds for %d generations each.\n", numberOfWorlds, maxGenerations);
 	}
 
 	MPI_Finalize();
@@ -184,7 +160,6 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	int printsize = chunksize;
 	chunksize += 2;
 
-	//int processWorldSize = xlen * ylen * chunksize;
 	int * current = calloc(xlen * ylen * chunksize, sizeof(int));
 	int * next = calloc(xlen * ylen * chunksize, sizeof(int));
 
@@ -194,40 +169,39 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 
 	MPI_Scatterv(sendbuf, scounts, displs, MPI_INT, recvbuf, scounts[processId], MPI_INT, MASTER, MPI_COMM_WORLD);
 
-	//release parsed world into oblivion
 	if (processId == MASTER){
 		free(sendbuf);
 	}
 
-	//TODO >> MASTER ONLY >> Output initial configuration and popluation
-	char * output_name_buf = malloc((100)*sizeof(char)); // max filename length
+    // TODO: исправить выходные файлы [+]
+	char * output_name_buf = malloc((100)*sizeof(char));
 	char * addtext = malloc((100)*sizeof(char));
-	sprintf(addtext, "Create this file... Date or something - maybe rules here...\n");
 	sprintf(output_name_buf, "outputfiles/%s_process_%d.txt", inputFile, processId);
 	replace_str(output_name_buf, "inputfiles/", "", 0);
+    // [-]
 
 	outputTXT(output_name_buf, "write", addtext, NULL, xlen, ylen, zlen);
 
-	//Generationen berechnen
+	// Вычисляем поколения
 	int count = xlen * ylen;
 
-	//for status output
+	/////
 	int advancement_counter = 0, advancement_target = 25;
 	char * advancement_print_buf = malloc((100)*sizeof(char));	
 	if(processId == MASTER)
 	{
-		printf("Evolving World %d : [_________________________]", numberOfWorlds); //change to current world variable
+		printf("Evolving World %d : [_________________________]", numberOfWorlds);
 		fflush(stdout);
 	}
 	
-	for (int generationX = 0; generationX < maxGenerationen; generationX++)
+	for (int generationX = 0; generationX < maxGenerations; generationX++)
 	{
 		if(processId == MASTER)
 		{
-			if(generationX > 0 && (int)((float)generationX/(float)((float)maxGenerationen/(float)advancement_target)) > advancement_counter)
+			if(generationX > 0 && (int)((float)generationX/(float)((float)maxGenerations/(float)advancement_target)) > advancement_counter)
 			{
 				advancement_counter++;
-				printf("\rEvolving World %d : [", numberOfWorlds); //change to current world variable
+				printf("\rEvolving World %d : [", numberOfWorlds);
 				for(int adv = 0; adv < advancement_counter-1; adv++){
 					printf("=");
 				}
@@ -240,19 +214,19 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 			}
 		}
 		
-		//this will be printed into the outputfiles
-		sprintf(addtext, "Generation: %d\nPopulation: %d\n", generationX, population);
+		// в файл
+		sprintf(addtext, "Поколение: %d\nНаселение: %d\n", generationX, population);
 		outputTXT(output_name_buf, "append", addtext, current + count, xlen, ylen, printsize);
 
-		//Exchange of front and back z-layers of neigbouhring slices of the cube
+		//Обмен передней и заднего Z-слоz в соседних сечениях куба
 		int * data = NULL;
 
 		int nextProcessId = (processId + 1) % numberOfProcesses;
 		int prevProcessId = (processId - 1);
 		prevProcessId = prevProcessId < 0 ? numberOfProcesses + prevProcessId : prevProcessId; //because % is not the modulo but the remainder operator
 
-		//Communication pattern
-		if (processId % 2 == 0) //even processes
+		// Свящь между процессами
+		if (processId % 2 == 0)
 		{			
 			data = &current[count*(chunksize - 2)];
 			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
@@ -266,7 +240,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 			data = &current[count*(chunksize - 1)];
 			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		}
-		else //odd processes
+		else
 		{			
 			data = current;
 			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -281,7 +255,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
 		}
 
-		//Each cube calculates its portion
+		// Для каждого кубика вычисляем его часть
 		population = 0;
 		for (int k = 1; k < chunksize - 1; k++)
 		{
@@ -307,17 +281,14 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 			}
 		}
 
-		//GATHER population
+		// Сбор населения
 		int * recbuffer = (int*)malloc(sizeof(int) * numberOfProcesses);
 		MPI_Gather(&population, 1, MPI_INT, recbuffer, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
 		population = 0;
 		if (processId == MASTER){
-			//printf("Generation %d :\n", generationX);
 			for (int i = 0; i < numberOfProcesses; i++){
 				population += recbuffer[i];
-				//printf("Process %d sum is %d\n", i, recbuffer[i]);
 			}
-			//printf("Final sum= %d \n\n", population);
 		}
 
 		free(recbuffer);
@@ -329,7 +300,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	
 	if(processId == MASTER)
 	{
-		printf("\rEvolving World %d : [=========================] - done.\n", numberOfWorlds); //change to current world variable
+		printf("\rEvolving World %d : [=========================] - done.\n", numberOfWorlds);
 	}
 
 	free(advancement_print_buf);
@@ -338,8 +309,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	return;
 }
 
-//Credit goes to Tudor from stackoverflow who edited this
-//stackoverflow.com/questions/8137244/best-way-to-replace-a-part-of-string-by-another-in-c
+// зачем?
 char *replace_str(char *str, char *orig, char *rep, int start)
 {
 	static char temp[4096];
@@ -348,10 +318,10 @@ char *replace_str(char *str, char *orig, char *rep, int start)
 
 	strcpy(temp, str + start);
 
-	if (!(p = strstr(temp, orig)))  // Is 'orig' even in 'temp'?
+	if (!(p = strstr(temp, orig)))
 		return temp;
 
-	strncpy(buffer, temp, p - temp); // Copy characters from 'temp' start to 'orig' str
+	strncpy(buffer, temp, p - temp);
 	buffer[p - temp] = '\0';
 
 	sprintf(buffer + (p - temp), "%s%s", rep, p + strlen(orig));
