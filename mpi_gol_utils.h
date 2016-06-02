@@ -1,3 +1,5 @@
+// Created by Kolesnikov S.S., Vecherkin B.I.
+
 #ifndef MPI_GOL_UTILS_H_INCLUDED
 #define MPI_GOL_UTILS_H_INCLUDED
 

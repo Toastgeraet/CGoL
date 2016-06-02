@@ -1,3 +1,5 @@
+// Created by Kolesnikov S.S., Vecherkin B.I.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,6 +49,7 @@ void parseArguments(int argc, char * argv[],
 	//printf("Input file: %s\n", argv[1]);
 
 	//'Usual' startup parameters
+
 	if (argc >= 8) {
 		inFile = argv[1];
 		while ((argc > 2) && (argv[2][0] == '-')) {
@@ -81,7 +84,6 @@ void parseArguments(int argc, char * argv[],
 			argv += 2;
 			argc -= 2;
 		}
-		//printf("Finished parsing of arguments.\n\n");
 	}
 }
 
@@ -99,7 +101,6 @@ int * createWorldFromTxt(char * name, int * population,
 	FILE *fp;
 	int c;
 
-	//printf("Starting to parse initial world from file...\n");
 	if (!(fp = fopen(name, "r"))) {
 		perror(name);
 		exit(1);
@@ -115,7 +116,7 @@ int * createWorldFromTxt(char * name, int * population,
 			tempworld[i] = 1;
 			*population = *population + 1;
 		} else {
-			i--; //because it's a linebreak char or something			
+			i--; // linebreak char
 		}
 	}
 
@@ -137,12 +138,12 @@ int outputTXT(char * name, char * mode, char * text, int * world,
 		fp = fopen(name, "a");
 	}
 	else {
-		printf("Bitte den Schreibmodus angeben.\n", name);
+		printf("Please specify the write mode.\n", name);
 		return 1;
 	}
 
 	if (fp == NULL)	{
-		printf("Datei %s konnte nicht geoeffnet werden.\n", name);
+		printf("File %s could not be opened.\n", name);
 		return 1;
 	}
 	else {
