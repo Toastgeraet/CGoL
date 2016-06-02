@@ -6,7 +6,7 @@
 #include "file_io.h"
 
 
-char * getline(void) {
+char * getline() {
 	char * line = malloc(100), *linep = line;
 	size_t lenmax = 100, len = lenmax;
 	int c;
@@ -38,21 +38,25 @@ char * getline(void) {
 	return linep;
 }
 
-void usage(void)
-{
+void usage() {
 	//printf("Usage:\n");
 	//printf("<inputfile> -x <value> -y <value> -z <value> -g <gens to evolve>\n");
 	exit(8);
 }
 
-void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * ylen, int * zlen, int * maxGens){
+void parseArguments(int argc, char * argv[], 
+	char * inFile, 
+	int * xlen, int * ylen, int * zlen, 
+	int * maxGens) {
+
 	//printf("Starting to parse arguments...\n");
 	//printf("Program name: %s\n", argv[0]);
 	//printf("Input file: %s\n", argv[1]);	
 	
-	//This should be moved to a different file. creating of directories got nothing to do with console...
-	if (strcmp(argv[1], "-create") == 0)
-	{		
+	// This should be moved to a different file. 
+	// creating of directories got nothing to do with console...
+	if (strcmp(argv[1], "-create") == 0) {		
+
 		printf("Deleting inputfiles directory and contents.\n");
 		rmrf("inputfiles");
 		printf("Creating new inputfiles directory.\n");
@@ -64,17 +68,13 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 		int y = atoi(argv[4]);
 		int z = atoi(argv[5]);
 		float s;
-		if (argc == 7)
-		{
+		if (argc == 7) {
 			s = atof(argv[6]); //s is the spawnrate - constraints: 0 < s <= 1
-		}
-		else
-		{
+		} else {
 			s = 0.25f; //default spawnrate
 		}		
 
-		for (int c = 0; c < count; c++)
-		{
+		for (int c = 0; c < count; c++)	{
 			createWorld(c, x, y, z, s);
 		}
 		printf("Finished creating %d Test Worlds.\n\n", count);
@@ -91,42 +91,38 @@ void parseArguments(int argc, char * argv[], char * inFile, int * xlen, int * yl
 	} //end create //non mpi
 
 	//'Usual' startup parameters
-	if (argc < 8)
-	{
+	if (argc < 8) {
 		//usage();
 	}
-	else
-	{
+	else {
 		inFile = argv[1];
-		while ((argc > 2) && (argv[2][0] == '-'))
-		{
+		while ((argc > 2) && (argv[2][0] == '-')) {
 			char ** str = &argv[3];
 
-			switch (argv[2][1])
-			{
-			case 'x':
-				//printf("x = %s\n", *str);
-				*xlen = (int)strtol(*str, (char **)NULL, 10);
-				break;
+			switch (argv[2][1])	{
+				case 'x':
+					//printf("x = %s\n", *str);
+					*xlen = (int)strtol(*str, (char **)NULL, 10);
+					break;
 
-			case 'y':
-				//printf("y = %s\n", *str);
-				*ylen = (int)strtol(*str, (char **)NULL, 10);
-				break;
+				case 'y':
+					//printf("y = %s\n", *str);
+					*ylen = (int)strtol(*str, (char **)NULL, 10);
+					break;
 
-			case 'z':
-				//printf("z = %s\n", *str);
-				*zlen = (int)strtol(*str, (char **)NULL, 10);
-				break;
+				case 'z':
+					//printf("z = %s\n", *str);
+					*zlen = (int)strtol(*str, (char **)NULL, 10);
+					break;
 
-			case 'g':
-				//printf("Worlds will evolve for %s generations.\n", *str);
-				*maxGens = (int)strtol(*str, (char **)NULL, 10);
-				break;
+				case 'g':
+					//printf("Worlds will evolve for %s generations.\n", *str);
+					*maxGens = (int)strtol(*str, (char **)NULL, 10);
+					break;
 
-			default:
-				//printf("Wrong Argument: %s\n", argv[1]);
-				usage();
+				default:
+					//printf("Wrong Argument: %s\n", argv[1]);
+					usage();
 			}
 
 			argv += 2;
