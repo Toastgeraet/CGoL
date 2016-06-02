@@ -1,3 +1,5 @@
+// Created by Kolesnikov S.S., Vecherkin B.I.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,10 +45,6 @@ void parseArguments(int argc, char * argv[],
 	int * xlen, int * ylen, int * zlen, 
 	int * maxGens) {
 
-	//printf("Starting to parse arguments...\n");
-	//printf("Program name: %s\n", argv[0]);
-	//printf("Input file: %s\n", argv[1]);
-
 	if (strcmp(argv[1], "-create") == 0) {		
 		
 		printf("Deleting inputfiles directory and contents.\n");
@@ -65,28 +63,26 @@ void parseArguments(int argc, char * argv[],
 		float s;
 
 		if (argc == 7) {
-			s = atof(argv[6]); //s is the spawnrate - constraints: 0 < s <= 1
+			s = atof(argv[6]);
 		} else {
-			s = 0.25f; //default spawnrate
+			s = 0.25f;
 		}		
 
 		for (int c = 0; c < count; c++)	{
 			createWorld(c, x, y, z, s);
 		}
-		printf("Finished creating %d Test Worlds.\n\n", count);
+		printf("Finished creating %d TestWorlds....\n\n", count);
 		
 		printf("Deleting outputfiles directory and contents.\n");
 		rmrf("outputfiles");
 		printf("Creating new outputfiles directory.\n");
 		mkdir("outputfiles", 0700);
-		printf("All set to go. Run mpi_gol as follows:\n");
+		printf("Run mpi_gol as follows:\n");
 		printf("mpiexec -np [numberOfProcesses] ./mpi_gol inputfiles -x %d -y %d -z %d -g [generations per world (default = 100)]:\n", x, y, z);
 		
-		//close program
 		exit(0);
-	} //end create //non mpi
+	}
 
-	//'Usual' startup parameters
 	if (argc >= 8) {
 		inFile = argv[1];
 		while ((argc > 2) && (argv[2][0] == '-')) {
@@ -121,7 +117,6 @@ void parseArguments(int argc, char * argv[],
 			argv += 2;
 			argc -= 2;
 		}
-		//printf("Finished parsing of arguments.\n\n");
 	}
 }
 
@@ -139,7 +134,6 @@ int * createWorldFromTxt(char * name, int * population,
 	FILE *fp;
 	int c;
 
-	//printf("Starting to parse initial world from file...\n");
 	if (!(fp = fopen(name, "r"))) {
 		perror(name);
 		exit(1);
@@ -155,7 +149,7 @@ int * createWorldFromTxt(char * name, int * population,
 			tempworld[i] = 1;
 			*population = *population + 1;
 		} else {
-			i--; //because it's a linebreak char or something			
+			i--; // linebreak char
 		}
 	}
 
@@ -177,12 +171,12 @@ int outputTXT(char * name, char * mode, char * text, int * world,
 		fp = fopen(name, "a");
 	}
 	else {
-		printf("Bitte den Schreibmodus angeben.\n", name);
+		printf("Please specify the write mode.\n", name);
 		return 1;
 	}
 
 	if (fp == NULL)	{
-		printf("Datei %s konnte nicht geoeffnet werden.\n", name);
+		printf("File %s could not be opened.\n", name);
 		return 1;
 	}
 	else {
