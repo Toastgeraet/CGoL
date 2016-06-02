@@ -10,10 +10,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-#include "mpi_gol_console.h"
+#include "mpi_gol_utils.h"
 #include "mpi_gol_logic.h"
-#include "mpi_gol_input.h"
-#include "mpi_gol_output.h"
 
 const int MASTER = 0;
 const int STEP_1 = 127;

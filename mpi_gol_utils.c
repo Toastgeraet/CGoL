@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "mpi_gol_create.h"
+#include "mpi_gol_logic.h"
 #include "file_io.h"
 
 
@@ -38,12 +38,6 @@ char * getline() {
 	return linep;
 }
 
-void usage() {
-	//printf("Usage:\n");
-	//printf("<inputfile> -x <value> -y <value> -z <value> -g <gens to evolve>\n");
-	exit(8);
-}
-
 void parseArguments(int argc, char * argv[], 
 	char * inFile, 
 	int * xlen, int * ylen, int * zlen, 
@@ -51,23 +45,25 @@ void parseArguments(int argc, char * argv[],
 
 	//printf("Starting to parse arguments...\n");
 	//printf("Program name: %s\n", argv[0]);
-	//printf("Input file: %s\n", argv[1]);	
-	
-	// This should be moved to a different file. 
-	// creating of directories got nothing to do with console...
-	if (strcmp(argv[1], "-create") == 0) {		
+	//printf("Input file: %s\n", argv[1]);
 
+	if (strcmp(argv[1], "-create") == 0) {		
+		
 		printf("Deleting inputfiles directory and contents.\n");
 		rmrf("inputfiles");
+		
 		printf("Creating new inputfiles directory.\n");
 		mkdir("inputfiles", 0700);
 
 		int count = atoi(argv[2]);
+		
 		printf("Creating %d testworlds...\n", count);
+		
 		int x = atoi(argv[3]);
 		int y = atoi(argv[4]);
 		int z = atoi(argv[5]);
 		float s;
+
 		if (argc == 7) {
 			s = atof(argv[6]); //s is the spawnrate - constraints: 0 < s <= 1
 		} else {
@@ -91,10 +87,7 @@ void parseArguments(int argc, char * argv[],
 	} //end create //non mpi
 
 	//'Usual' startup parameters
-	if (argc < 8) {
-		//usage();
-	}
-	else {
+	if (argc >= 8) {
 		inFile = argv[1];
 		while ((argc > 2) && (argv[2][0] == '-')) {
 			char ** str = &argv[3];
@@ -122,7 +115,7 @@ void parseArguments(int argc, char * argv[],
 
 				default:
 					//printf("Wrong Argument: %s\n", argv[1]);
-					usage();
+					exit(8);
 			}
 
 			argv += 2;
@@ -130,4 +123,89 @@ void parseArguments(int argc, char * argv[],
 		}
 		//printf("Finished parsing of arguments.\n\n");
 	}
+}
+
+
+int * createWorldFromTxt(char * name, int * population, 
+	int xlen, int ylen, int zlen) {
+	
+	//printf("Creating space for intial world...\n");
+	int worldsize = xlen*ylen*zlen;
+	int * tempworld = malloc(worldsize * sizeof(int));
+	//printf("Finished creating world.\n");
+
+	* population = 0;
+
+	FILE *fp;
+	int c;
+
+	//printf("Starting to parse initial world from file...\n");
+	if (!(fp = fopen(name, "r"))) {
+		perror(name);
+		exit(1);
+	}
+
+	for (int i = 0; i < worldsize; i++)	{
+		if ((c = fgetc(fp)) == EOF) {
+			break;
+		}
+		if (c == '0') {
+			tempworld[i] = 0;
+		} else if (c == '1') {
+			tempworld[i] = 1;
+			*population = *population + 1;
+		} else {
+			i--; //because it's a linebreak char or something			
+		}
+	}
+
+	fclose(fp);
+	//printf("Finished creating world and parsing input file.\n\n");
+	//printf("Initial population = %d\n", * population);
+	return tempworld;
+}
+
+int outputTXT(char * name, char * mode, char * text, int * world, 
+	int xlen, int ylen, int zlen) {
+
+	//printf("Writing to file \"%s\"...\n", name);
+	FILE *fp;
+
+	if (strcmp(mode, "write") == 0) {
+		fp = fopen(name, "w");
+	} else if (strcmp(mode, "append") == 0) {
+		fp = fopen(name, "a");
+	}
+	else {
+		printf("Bitte den Schreibmodus angeben.\n", name);
+		return 1;
+	}
+
+	if (fp == NULL)	{
+		printf("Datei %s konnte nicht geoeffnet werden.\n", name);
+		return 1;
+	}
+	else {
+		fwrite(text, sizeof(char), strlen(text), fp);
+		fputc(10, fp);
+		if (world != NULL) {
+			for (int k = 0; k < zlen; k++) {
+				for (int j = 0; j < ylen; j++) {
+					for (int i = 0; i < xlen; i++) {
+						if (world[offset(i, j, k, xlen, ylen)]) {
+							fputc('1', fp);
+						}
+						else {
+							fputc('0', fp);
+						}
+					}
+					fputc(10, fp);
+				}
+				fputc(10, fp);
+			}
+		}
+		fclose(fp);
+	}
+	//printf("Finished writing.\n");
+	return 0;
 }
