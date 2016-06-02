@@ -1,7 +1,8 @@
+// Created by Kolesnikov S.S., Vecherkin B.I.
+
 #ifndef MPI_GOL_LOGIC_H_INCLUDED
 #define MPI_GOL_LOGIC_H_INCLUDED
 
-// startup
 int createWorld(int number, int xlen, int ylen, int zlen, float spawnrate);
 
 

@@ -1,3 +1,5 @@
+// Created by Kolesnikov S.S., Vecherkin B.I.
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "mpi_gol_logic.h"
