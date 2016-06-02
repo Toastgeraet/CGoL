@@ -1,11 +1,11 @@
+// Created by Kolesnikov S.S., Vecherkin B.I.
+
 #define _CRT_SECURE_NO_WARNINGS
 #define _XOPEN_SOURCE 600
 
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
-// Created by Kolesnikov S.S., Vecherkin B.I.
-
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
