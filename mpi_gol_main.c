@@ -4,6 +4,8 @@
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
+// Created by Kolesnikov S.S., Vecherkin B.I.
+
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
