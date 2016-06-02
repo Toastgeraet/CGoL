@@ -1,5 +1,7 @@
 // Created by Kolesnikov S.S., Vecherkin B.I.
 
+#define _XOPEN_SOURCE 600
+
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,10 +58,9 @@ int main(int argc, char * argv[])
 
 	// Проверяю входной файл на корректность
 	struct stat s;
-	if (stat(inputFileArgument, &s) == 0)
-	{
-		if (s.st_mode & S_IFDIR) // тип файла (также флаги доступа) & директория
-		{
+	if (stat(inputFileArgument, &s) == 0) {
+		// тип файла (также флаги доступа) & директория
+		if (s.st_mode & S_IFDIR) {
 			// если директория
 			DIR *dir;
 			struct dirent *ent;
@@ -68,13 +69,14 @@ int main(int argc, char * argv[])
 				char * concatenationBuffer = (char*)malloc(100*sizeof(char));
 
 				while ((ent = readdir(dir)) != NULL) {
-					if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
-					{
+					if (strcmp(ent->d_name, ".") == 0 
+						|| strcmp(ent->d_name, "..") == 0) {
 						continue;
 					}										
 					sprintf(concatenationBuffer, "inputfiles/%s", ent->d_name);
-					if (processId == MASTER){
-						printf("ProcessId: %d Filename: %s\n", processId, concatenationBuffer);
+					if (processId == MASTER) {
+						printf("ProcessId: %d Filename: %s\n", 
+							processId, concatenationBuffer);
 					}
 					numberOfWorlds++;
 					evolveWorld(concatenationBuffer, xlen, ylen, zlen);					
@@ -86,44 +88,38 @@ int main(int argc, char * argv[])
 				perror("");
 				return EXIT_FAILURE;
 			}
-		}
-		else if (s.st_mode & S_IFREG) // тип файла - regular
-		{
+		} else if (s.st_mode & S_IFREG) { // тип файла - regular
 			// если файл
 			numberOfWorlds++;
 			inputFile = inputFileArgument;
 			printf("Evolving %s ...\n", inputFile);
 			evolveWorld(inputFile, xlen, ylen, zlen);
-		}
-		else
-		{
+		} else {
 			//
 		}
-	}
-	else
-	{
+	} else {
 		// ошибка
 	}
 
-	if (processId == MASTER)
-    {
-		printf("Finished evolving %d worlds for %d generations each.\n", numberOfWorlds, maxGenerations);
+	if (processId == MASTER) {
+		printf("Finished evolving %d worlds for %d generations each.\n", 
+			numberOfWorlds, maxGenerations);
 	}
 
 	MPI_Finalize();
 }
 
-void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
-{
+void evolveWorld(char * inputFile, int xlen, int ylen, int zlen) {
+
 	//Parse inputworld into memory | mpi_gol_input.c
 	int * input;
 	int population = 0;
 
-	if (processId == MASTER){
+	if (processId == MASTER) {
 		input = createWorldFromTxt(inputFile, &population, xlen, ylen, zlen);
 	}
 
-	if (processId == MASTER){
+	if (processId == MASTER) {
 		printf("Initial population is %d\n", population);
 	}
 
@@ -167,7 +163,9 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 
 	int * recvbuf = current + z_layer_size;
 
-	MPI_Scatterv(sendbuf, scounts, displs, MPI_INT, recvbuf, scounts[processId], MPI_INT, MASTER, MPI_COMM_WORLD);
+	MPI_Scatterv(sendbuf, scounts, displs, 
+		MPI_INT, recvbuf, scounts[processId], 
+		MPI_INT, MASTER, MPI_COMM_WORLD);
 
 	if (processId == MASTER){
 		free(sendbuf);
@@ -176,7 +174,8 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
     // TODO: исправить выходные файлы [+]
 	char * output_name_buf = malloc((100)*sizeof(char));
 	char * addtext = malloc((100)*sizeof(char));
-	sprintf(output_name_buf, "outputfiles/%s_process_%d.txt", inputFile, processId);
+	sprintf(output_name_buf, "outputfiles/%s_process_%d.txt", 
+		inputFile, processId);
 	replace_str(output_name_buf, "inputfiles/", "", 0);
     // [-]
 
@@ -190,92 +189,105 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 	char * advancement_print_buf = malloc((100)*sizeof(char));	
 	if(processId == MASTER)
 	{
-		printf("Evolving World %d : [_________________________]", numberOfWorlds);
+		printf("Evolving World %d : [_________________________]", 
+			numberOfWorlds);
 		fflush(stdout);
 	}
 	
-	for (int generationX = 0; generationX < maxGenerations; generationX++)
-	{
-		if(processId == MASTER)
-		{
-			if(generationX > 0 && (int)((float)generationX/(float)((float)maxGenerations/(float)advancement_target)) > advancement_counter)
-			{
+	for (int generationX = 0; generationX < maxGenerations; generationX++) {
+		if(processId == MASTER) {
+			if(generationX > 0 
+				&& (int)((float)generationX/(float)((float)maxGenerations/(float)advancement_target)) > advancement_counter) {
+
 				advancement_counter++;
 				printf("\rEvolving World %d : [", numberOfWorlds);
-				for(int adv = 0; adv < advancement_counter-1; adv++){
+
+				for(int adv = 0; adv < advancement_counter - 1; adv++) {
 					printf("=");
 				}
+
 				printf(">");
-				for(int rest = 0; rest < advancement_target - advancement_counter; rest++){
+
+				for(int rest = 0; rest < advancement_target - advancement_counter; rest++) {
 					printf("_");
 				}
+
 				printf("]");
+
 				fflush(stdout);
 			}
 		}
 		
 		// в файл
-		sprintf(addtext, "Поколение: %d\nНаселение: %d\n", generationX, population);
-		outputTXT(output_name_buf, "append", addtext, current + count, xlen, ylen, printsize);
+		sprintf(addtext, "Поколение: %d\nНаселение: %d\n", 
+			generationX, population);
+
+		outputTXT(output_name_buf, "append", addtext, 
+			current + count, xlen, ylen, printsize);
 
 		//Обмен передней и заднего Z-слоz в соседних сечениях куба
 		int * data = NULL;
 
 		int nextProcessId = (processId + 1) % numberOfProcesses;
 		int prevProcessId = (processId - 1);
-		prevProcessId = prevProcessId < 0 ? numberOfProcesses + prevProcessId : prevProcessId; //because % is not the modulo but the remainder operator
+
+		prevProcessId = prevProcessId < 0 ? 
+			numberOfProcesses + prevProcessId : prevProcessId; //because % is not the modulo but the remainder operator
 
 		// Свящь между процессами
-		if (processId % 2 == 0)
-		{			
+		if (processId % 2 == 0)	{			
 			data = &current[count*(chunksize - 2)];
-			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
+			MPI_Ssend(data, count, MPI_INT, 
+				nextProcessId, STEP_1, MPI_COMM_WORLD);
 						
 			data = current;
-			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, 
+				prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 						
 			data = current + count;
-			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
+			MPI_Ssend(data, count, MPI_INT, 
+				prevProcessId, STEP_1, MPI_COMM_WORLD);
 						
 			data = &current[count*(chunksize - 1)];
-			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		}
-		else
-		{			
+			MPI_Recv(data, count, MPI_INT, 
+				nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		} else {
 			data = current;
-			MPI_Recv(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, 
+				prevProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 									
 			data = &current[count*(chunksize - 2)];
-			MPI_Ssend(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD);
+			MPI_Ssend(data, count, MPI_INT, 
+				nextProcessId, STEP_1, MPI_COMM_WORLD);
 			
 			data = &current[count*(chunksize - 1)];
-			MPI_Recv(data, count, MPI_INT, nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(data, count, MPI_INT, 
+				nextProcessId, STEP_1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
 			data = current + count;
-			MPI_Ssend(data, count, MPI_INT, prevProcessId, STEP_1, MPI_COMM_WORLD);
+			MPI_Ssend(data, count, MPI_INT, 
+				prevProcessId, STEP_1, MPI_COMM_WORLD);
 		}
 
 		// Для каждого кубика вычисляем его часть
 		population = 0;
-		for (int k = 1; k < chunksize - 1; k++)
-		{
-			for (int j = 0; j < ylen; j++)
-			{
-				for (int i = 0; i < xlen; i++)
-				{
+		for (int k = 1; k < chunksize - 1; k++) {
+			for (int j = 0; j < ylen; j++) {
+				for (int i = 0; i < xlen; i++) {
 					int index = offset(i, j, k, xlen, ylen);
 
-					int c = count_neighbours(current, xlen, ylen, zlen, i, j, k);
+					int c = 
+						count_neighbours(current, xlen, ylen, zlen, i, j, k);
 
-					if (current[index])
-					{
-						if (next[index] = c >= minToLive && c <= maxToLive)
+					if (current[index]) {
+						if (next[index] = c >= minToLive && c <= maxToLive) {
 							population++;
-					}
-					else
-					{
-						if (next[index] = c >= minToResurrect && c <= maxToResurrect)
+						}
+					} else {
+						if (next[index] = c >= minToResurrect 
+							&& c <= maxToResurrect) {
 							population++;
+						}
 					}
 				}
 			}
@@ -283,10 +295,13 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 
 		// Сбор населения
 		int * recbuffer = (int*)malloc(sizeof(int) * numberOfProcesses);
-		MPI_Gather(&population, 1, MPI_INT, recbuffer, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
+
+		MPI_Gather(&population, 1, MPI_INT, 
+			recbuffer, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
 		population = 0;
-		if (processId == MASTER){
-			for (int i = 0; i < numberOfProcesses; i++){
+
+		if (processId == MASTER) {
+			for (int i = 0; i < numberOfProcesses; i++) {
 				population += recbuffer[i];
 			}
 		}
@@ -298,9 +313,9 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 		next = calloc(xlen * ylen * chunksize, sizeof(int));
 	}
 	
-	if(processId == MASTER)
-	{
-		printf("\rEvolving World %d : [=========================] - done.\n", numberOfWorlds);
+	if(processId == MASTER) {
+		printf("\rEvolving World %d : [=========================] - done.\n", 
+			numberOfWorlds);
 	}
 
 	free(advancement_print_buf);
@@ -310,8 +325,7 @@ void evolveWorld(char * inputFile, int xlen, int ylen, int zlen)
 }
 
 // зачем?
-char *replace_str(char *str, char *orig, char *rep, int start)
-{
+char *replace_str(char *str, char *orig, char *rep, int start) {
 	static char temp[4096];
 	static char buffer[4096];
 	char *p;
