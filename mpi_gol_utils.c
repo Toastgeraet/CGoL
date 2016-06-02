@@ -3,7 +3,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "mpi_gol_logic.h"
-#include "file_io.h"
 
 
 char * getline() {
@@ -46,45 +45,6 @@ void parseArguments(int argc, char * argv[],
 	//printf("Starting to parse arguments...\n");
 	//printf("Program name: %s\n", argv[0]);
 	//printf("Input file: %s\n", argv[1]);
-
-	if (strcmp(argv[1], "-create") == 0) {		
-		
-		printf("Deleting inputfiles directory and contents.\n");
-		rmrf("inputfiles");
-		
-		printf("Creating new inputfiles directory.\n");
-		mkdir("inputfiles", 0700);
-
-		int count = atoi(argv[2]);
-		
-		printf("Creating %d testworlds...\n", count);
-		
-		int x = atoi(argv[3]);
-		int y = atoi(argv[4]);
-		int z = atoi(argv[5]);
-		float s;
-
-		if (argc == 7) {
-			s = atof(argv[6]); //s is the spawnrate - constraints: 0 < s <= 1
-		} else {
-			s = 0.25f; //default spawnrate
-		}		
-
-		for (int c = 0; c < count; c++)	{
-			createWorld(c, x, y, z, s);
-		}
-		printf("Finished creating %d Test Worlds.\n\n", count);
-		
-		printf("Deleting outputfiles directory and contents.\n");
-		rmrf("outputfiles");
-		printf("Creating new outputfiles directory.\n");
-		mkdir("outputfiles", 0700);
-		printf("All set to go. Run mpi_gol as follows:\n");
-		printf("mpiexec -np [numberOfProcesses] ./mpi_gol inputfiles -x %d -y %d -z %d -g [generations per world (default = 100)]:\n", x, y, z);
-		
-		//close program
-		exit(0);
-	} //end create //non mpi
 
 	//'Usual' startup parameters
 	if (argc >= 8) {
